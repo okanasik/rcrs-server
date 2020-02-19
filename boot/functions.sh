@@ -162,7 +162,7 @@ function execute {
 
 # Start the kernel
 function startKernel {
-    KERNEL_OPTIONS="-c $CONFIGDIR/kernel.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log $*"
+    KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log $*"
     makeClasspath $BASEDIR/jars $BASEDIR/lib
 
     execute kernel "java -Xmx2048m -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS"
