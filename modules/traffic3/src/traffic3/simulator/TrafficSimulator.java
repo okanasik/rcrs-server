@@ -82,11 +82,14 @@ public class TrafficSimulator extends StandardSimulator implements GUIComponent 
 	 */
 	public TrafficSimulator() {
 		manager = new TrafficManager();
-		gui = new TrafficSimulatorGUI(manager);
 	}
 
 	@Override
 	public JComponent getGUIComponent() {
+		if (gui == null) {
+			gui = new TrafficSimulatorGUI(manager);
+			gui.initialise();
+		}
 		return gui;
 	}
 
@@ -132,7 +135,6 @@ public class TrafficSimulator extends StandardSimulator implements GUIComponent 
 				}
 			}
 		});
-		gui.initialise();
 		manager.cacheInformation(model);
 	}
 
@@ -902,6 +904,8 @@ public class TrafficSimulator extends StandardSimulator implements GUIComponent 
 		for (TrafficAgent agent : manager.getAgents()) {
 			agent.step(STEP_TIME_MS);
 		}
-		gui.refresh();
+		if (gui != null) {
+			gui.refresh();
+		}
 	}
 }
