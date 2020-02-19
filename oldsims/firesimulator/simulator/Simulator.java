@@ -99,7 +99,7 @@ public class Simulator {
 
 
   public void step( int timestep ) {
-    energyHistory = new EnergyHistory( world, timestep );
+    //energyHistory = new EnergyHistory( world, timestep );
     refill();
     executeExtinguishRequests();
     burn();
@@ -108,8 +108,8 @@ public class Simulator {
     exchangeBuilding();
     // FIXED
     cool();
-    energyHistory.registerFinalEnergy( world );
-    energyHistory.logSummary();
+    //energyHistory.registerFinalEnergy( world );
+    //energyHistory.logSummary();
   }
 
 
@@ -152,7 +152,7 @@ public class Simulator {
         double oldEnergy = b.getEnergy();
         double oldTemp = b.getTemperature();
         b.setEnergy( b.getEnergy() + consumed );
-        energyHistory.registerBurn( b, consumed );
+        //energyHistory.registerBurn( b, consumed );
         b.fuel -= consumed;
         b.setPrevBurned( consumed );
       } else {
@@ -185,7 +185,7 @@ public class Simulator {
       }
       b.setWaterQuantity( b.getWaterQuantity() - consumed );
       b.setEnergy( b.getEnergy() - effect );
-      energyHistory.registerCool( b, effect );
+      //energyHistory.registerCool( b, effect );
       LOG.debug( "Building " + b.getID() + " water cooling" );
       LOG.debug( "Old energy: " + oldEnergy + ", old temperature: " + oldTemp
           + ", old water: " + oldWater );
@@ -220,10 +220,10 @@ public class Simulator {
         double a = radEn * connectionValue;
         double sum = oldEnergy + a;
         bs[c].setEnergy( sum );
-        energyHistory.registerRadiationGain( bs[c], a );
+        //energyHistory.registerRadiationGain( bs[c], a );
       }
       b.setEnergy( b.getEnergy() - radEn );
-      energyHistory.registerRadiationLoss( b, -radEn );
+      //energyHistory.registerRadiationLoss( b, -radEn );
     }
   }
 
@@ -248,7 +248,7 @@ public class Simulator {
       world.setAirCellTemp( cellX, cellY, newCellTemp );
     }
     b.setEnergy( oldEnergy + energyDelta );
-    energyHistory.registerAir( b, energyDelta );
+    //energyHistory.registerAir( b, energyDelta );
   }
 
 
