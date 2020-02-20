@@ -14,6 +14,6 @@ startKernel --autorun --nomenu --nogui
 #xterm -T agents -e "./sampleagent.sh" &
 #PIDS="$PIDS $!"
 
-waitFor $LOGDIR/kernel.log "Kernel has shut down" 30
+#waitFor $LOGDIR/kernel.log "Kernel has shut down" 30
 
-kill $PIDS
+#kill $PIDS
