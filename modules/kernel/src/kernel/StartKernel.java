@@ -177,7 +177,7 @@ public final class StartKernel {
 					Constants.SCORE_FUNCTION_KEY, ScoreFunction.class));
 
 			Logger.setLogContext("kernel");
-			final KernelInfo kernelInfo = createKernel(config, showStartupMenu);
+			final KernelInfo kernelInfo = createKernel(config, showStartupMenu, showGUI);
 			if (kernelInfo == null) {
 				System.exit(0);
 			}
@@ -229,7 +229,7 @@ public final class StartKernel {
 		}
 	}
 
-	private static KernelInfo createKernel(Config config, boolean showMenu)
+	private static KernelInfo createKernel(Config config, boolean showMenu, boolean showGUI)
 			throws KernelException, DocumentException{
 		KernelStartupOptions options = new KernelStartupOptions(config);
 		// Show the chooser GUI
@@ -285,9 +285,14 @@ public final class StartKernel {
 		// Create the component manager
 		ComponentManager componentManager = new ComponentManager(kernel,
 				worldModel, config, scenario);
-		KernelInfo result = new KernelInfo(kernel, options, componentManager,
-				makeGUIComponents(config, componentManager, perception, comms,
-						termination, filter, graph, collector, score));
+		KernelInfo result;
+		if (showGUI) {
+			result = new KernelInfo(kernel, options, componentManager,
+					makeGUIComponents(config, componentManager, perception, comms,
+							termination, filter, graph, collector, score));
+		} else {
+			result = new KernelInfo(kernel, options, componentManager, new ArrayList<>());
+		}
 		return result;
 	}
 
@@ -295,6 +300,7 @@ public final class StartKernel {
 			Registry registry) throws KernelException {
 		registerInitialAgents(config, kernel.componentManager,
 				kernel.kernel.getWorldModel());
+
 		if (!config.getBooleanValue(KernelConstants.INLINE_ONLY_KEY, false)) {
 			// Start the connection manager
 			ConnectionManager connectionManager = new ConnectionManager();
@@ -371,6 +377,7 @@ public final class StartKernel {
 		KernelStartupOptions options = info.options;
 		Collection<Callable<Void>> all = new ArrayList<Callable<Void>>();
 		Config launchConfig = new Config(config);
+		// keeps only random seed
 		launchConfig.removeExcept(Constants.RANDOM_SEED_KEY,
 				Constants.RANDOM_CLASS_KEY);
 		for (Pair<String, Integer> next : options.getInlineComponents()) {
@@ -383,6 +390,8 @@ public final class StartKernel {
 		ExecutorService service = Executors.newFixedThreadPool(Runtime
 				.getRuntime().availableProcessors());
 		service.invokeAll(all);
+		// shutdown the pool when all threads exits
+		service.shutdown();
 	}
 
 	private static void registerInitialAgents(Config config,
@@ -430,14 +439,18 @@ public final class StartKernel {
 
 	private static CommandCollector makeCommandCollector(Config config) {
 		List<String> classNames = config.getArrayValue(COMMAND_COLLECTOR_KEY);
-		CompositeCommandCollector result = new CompositeCommandCollector();
-		for (String next : classNames) {
-			CommandCollector c = instantiate(next, CommandCollector.class);
-			if (c != null) {
-				result.addCommandCollector(c);
+		if (classNames.size() == 1) {
+			return instantiate(classNames.get(0), CommandCollector.class);
+		} else {
+			CompositeCommandCollector result = new CompositeCommandCollector();
+			for (String next : classNames) {
+				CommandCollector c = instantiate(next, CommandCollector.class);
+				if (c != null) {
+					result.addCommandCollector(c);
+				}
 			}
+			return result;
 		}
-		return result;
 	}
 
 	private static List<GUIComponent> makeGUIComponents(Config config,
