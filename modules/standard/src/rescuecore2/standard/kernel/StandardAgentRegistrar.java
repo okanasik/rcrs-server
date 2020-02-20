@@ -89,6 +89,7 @@ public class StandardAgentRegistrar implements AgentRegistrar {
         agentConfig.setIntValue(StandardConstants.POLICE_OFFICE_COUNT_KEY, model.getEntitiesOfType(StandardEntityURN.POLICE_OFFICE).size());
         Set<Entity> initialEntities = new HashSet<Entity>();
         for (Entity e : world) {
+            // road, buildings, human (except civilian)
             maybeAddInitialEntity(e, initialEntities);
         }
         for (Entity e : world) {
@@ -99,6 +100,7 @@ public class StandardAgentRegistrar implements AgentRegistrar {
                        || e instanceof PoliceForce
                        || e instanceof PoliceOffice
                        ) {
+        	       // if agent
                    Set<Entity> s = new HashSet<Entity>(initialEntities);
                    s.remove(e);
                    s.add(e);
@@ -116,7 +118,6 @@ public class StandardAgentRegistrar implements AgentRegistrar {
                    }
                    manager.registerAgentControlledEntity(e, s, civilianConfig);
                }
-
         }
     }
 

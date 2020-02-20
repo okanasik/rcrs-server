@@ -49,6 +49,7 @@ public class ScoreGraph extends DelegatingScoreFunction implements GUIComponent 
     @Override
     public void initialise(WorldModel<? extends Entity> world, Config config) {
         super.initialise(world, config);
+        // TODO: this part seems unneccessary if we are not going to visualize the score
         allSeries = new ArrayList<SeriesInfo>();
         XYSeriesCollection data = new XYSeriesCollection();
         createSeries(child, data);

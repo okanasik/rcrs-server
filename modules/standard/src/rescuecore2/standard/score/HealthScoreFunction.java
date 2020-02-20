@@ -34,6 +34,7 @@ public class HealthScoreFunction extends AbstractScoreFunction {
     public double score(WorldModel<? extends Entity> world, Timestep timestep) {
         double sum = 0;
         double max = 0;
+        // TODO: we can improve the performance if we iterate over civilians only
         for (Entity next : world) {
             if (next instanceof Civilian) {
                 Civilian c = (Civilian)next;
