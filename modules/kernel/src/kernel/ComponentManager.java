@@ -100,7 +100,6 @@ public class ComponentManager implements ConnectionManagerListener,
 		simsToAcknowledge = new HashSet<SimulatorAck>();
 		viewersToAcknowledge = new HashSet<ViewerAck>();
 		nextID = STARTING_ID;
-		gui = new ComponentManagerGUI();
 	}
 
 	/**
@@ -205,6 +204,9 @@ public class ComponentManager implements ConnectionManagerListener,
 
 	@Override
 	public JComponent getGUIComponent() {
+		if (gui == null) {
+			gui = new ComponentManagerGUI();
+		}
 		return gui;
 	}
 
@@ -288,45 +290,53 @@ public class ComponentManager implements ConnectionManagerListener,
 	}
 
 	private void updateGUIUncontrolledAgents() {
-		List<String> data = new ArrayList<String>();
-		synchronized (agentLock) {
-			for (Queue<ControlledEntityInfo> q : uncontrolledEntities.values()) {
-				for (ControlledEntityInfo info : q) {
-					data.add(info.entity.getURN() + " " + info.entity.getID());
+		if (gui != null) {
+			List<String> data = new ArrayList<String>();
+			synchronized (agentLock) {
+				for (Queue<ControlledEntityInfo> q : uncontrolledEntities.values()) {
+					for (ControlledEntityInfo info : q) {
+						data.add(info.entity.getURN() + " " + info.entity.getID());
+					}
 				}
 			}
+			gui.updateUncontrolledAgents(data);
 		}
-		gui.updateUncontrolledAgents(data);
 	}
 
 	private void updateGUIAgentAck() {
-		List<String> data = new ArrayList<String>();
-		synchronized (agentLock) {
-			for (AgentAck ack : agentsToAcknowledge) {
-				data.add(ack.toString());
+		if (gui != null) {
+			List<String> data = new ArrayList<String>();
+			synchronized (agentLock) {
+				for (AgentAck ack : agentsToAcknowledge) {
+					data.add(ack.toString());
+				}
 			}
+			gui.updateAgentAck(data);
 		}
-		gui.updateAgentAck(data);
 	}
 
 	private void updateGUISimulatorAck() {
-		List<String> data = new ArrayList<String>();
-		synchronized (simLock) {
-			for (SimulatorAck ack : simsToAcknowledge) {
-				data.add(ack.toString());
+		if (gui != null) {
+			List<String> data = new ArrayList<String>();
+			synchronized (simLock) {
+				for (SimulatorAck ack : simsToAcknowledge) {
+					data.add(ack.toString());
+				}
 			}
+			gui.updateSimulatorAck(data);
 		}
-		gui.updateSimulatorAck(data);
 	}
 
 	private void updateGUIViewerAck() {
-		List<String> data = new ArrayList<String>();
-		synchronized (viewerLock) {
-			for (ViewerAck ack : viewersToAcknowledge) {
-				data.add(ack.toString());
+		if (gui != null) {
+			List<String> data = new ArrayList<String>();
+			synchronized (viewerLock) {
+				for (ViewerAck ack : viewersToAcknowledge) {
+					data.add(ack.toString());
+				}
 			}
+			gui.updateViewerAck(data);
 		}
-		gui.updateViewerAck(data);
 	}
 
 	private class ComponentConnectionListener implements ConnectionListener {
