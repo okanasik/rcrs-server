@@ -1,5 +1,10 @@
 package rescuecore2.config;
 
+import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.uncommons.maths.random.SeedGenerator;
+import rescuecore2.Constants;
+import rescuecore2.log.Logger;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -24,12 +29,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.uncommons.maths.random.MersenneTwisterRNG;
-import org.uncommons.maths.random.SeedGenerator;
-
-import rescuecore2.Constants;
-import rescuecore2.log.Logger;
 
 /**
    This class represents a config file and any other config files that might have been included with a !include directive. Config files must be defined relative to a base directory so that includes can be resolved.
@@ -610,6 +609,14 @@ public class Config {
             data.remove(next);
             noCache.remove(next);
         }
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (String key : data.keySet()) {
+            sb.append(key + ":" + data.get(key) + "\n");
+        }
+        return sb.toString();
     }
 
     /**
