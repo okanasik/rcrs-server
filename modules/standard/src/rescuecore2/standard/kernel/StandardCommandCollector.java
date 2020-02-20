@@ -25,7 +25,8 @@ import java.util.ArrayList;
    A CommandCollector that will wait until a non-communication command has been received from each agent.
 */
 public class StandardCommandCollector implements CommandCollector {
-    private static final long WAIT_TIME = 100;
+    // wait as small as possible
+    private static final long WAIT_TIME = 1;
 
     @Override
     public void initialise(Config config) {
@@ -41,6 +42,7 @@ public class StandardCommandCollector implements CommandCollector {
                     if (isTriggerCommand(c)) {
                         Logger.debug(next + " sent a trigger command");
                         waiting.remove(next);
+                        break;
                     }
                 }
             }
