@@ -1,44 +1,42 @@
 package kernel;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.HashMap;
-
+import kernel.ui.ComponentManagerGUI;
+import rescuecore2.GUIComponent;
 import rescuecore2.config.Config;
 import rescuecore2.connection.Connection;
 import rescuecore2.connection.ConnectionException;
 import rescuecore2.connection.ConnectionListener;
 import rescuecore2.connection.ConnectionManagerListener;
+import rescuecore2.log.Logger;
 import rescuecore2.messages.Message;
-import rescuecore2.messages.control.KSAfterShocksInfo;
-import rescuecore2.messages.control.VKConnect;
-import rescuecore2.messages.control.VKAcknowledge;
-import rescuecore2.messages.control.KVConnectOK;
-import rescuecore2.messages.control.SKConnect;
-import rescuecore2.messages.control.SKAcknowledge;
-import rescuecore2.messages.control.KSConnectOK;
-import rescuecore2.messages.control.AKConnect;
 import rescuecore2.messages.control.AKAcknowledge;
+import rescuecore2.messages.control.AKConnect;
 import rescuecore2.messages.control.KAConnectError;
 import rescuecore2.messages.control.KAConnectOK;
+import rescuecore2.messages.control.KSAfterShocksInfo;
+import rescuecore2.messages.control.KSConnectOK;
+import rescuecore2.messages.control.KVConnectOK;
+import rescuecore2.messages.control.SKAcknowledge;
+import rescuecore2.messages.control.SKConnect;
+import rescuecore2.messages.control.VKAcknowledge;
+import rescuecore2.messages.control.VKConnect;
 import rescuecore2.scenario.Scenario;
 import rescuecore2.scenario.exceptions.UncompatibleScenarioException;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.GUIComponent;
-import rescuecore2.log.Logger;
 
-import kernel.ui.ComponentManagerGUI;
-
-import javax.swing.JComponent;
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * Class that manages connecting components (agents, simulators, viewers) to the
@@ -48,7 +46,8 @@ public class ComponentManager implements ConnectionManagerListener,
 		GUIComponent {
 	private static final int STARTING_ID = 1;
 
-	private static final int WAIT_TIME = 10000;
+	// wait less 10000
+	private static final int WAIT_TIME = 10;
 
 	private Kernel kernel;
 	private ComponentManagerGUI gui;
