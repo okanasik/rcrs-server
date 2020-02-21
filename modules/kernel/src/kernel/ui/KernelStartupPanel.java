@@ -1,35 +1,20 @@
 package kernel.ui;
 
-import javax.swing.JPanel;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.JScrollPane;
-import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
-import javax.swing.JSplitPane;
-
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-
-import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import java.util.Collection;
-import java.util.List;
-
-import kernel.WorldModelCreator;
-import kernel.Perception;
 import kernel.CommunicationModel;
 import kernel.KernelStartupOptions;
-
+import kernel.Perception;
+import kernel.WorldModelCreator;
 import rescuecore2.config.Config;
-import rescuecore2.components.Component;
 import rescuecore2.misc.gui.ConfigTree;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Collection;
+import java.util.List;
 
 /**
    A JPanel for displaying and editing kernel startup options.
@@ -148,7 +133,7 @@ public class KernelStartupPanel extends JPanel {
     }
 
     private static final class CheckboxPanel extends JPanel {
-        private CheckboxPanel(Collection<? extends Component> available, final KernelStartupOptions options) {
+        private CheckboxPanel(Collection<String> available, final KernelStartupOptions options) {
             GridBagLayout layout = new GridBagLayout();
             GridBagConstraints c = new GridBagConstraints();
             c.gridx = 0;
@@ -160,10 +145,10 @@ public class KernelStartupPanel extends JPanel {
             c.fill = GridBagConstraints.BOTH;
             c.anchor = GridBagConstraints.CENTER;
             setLayout(layout);
-            for (Component t : available) {
+            for (String t : available) {
                 c.gridx = 0;
                 c.weightx = 1;
-                JLabel l = new JLabel(t.getName());
+                JLabel l = new JLabel(t);
                 layout.setConstraints(l, c);
                 add(l);
                 c.gridx = 1;
@@ -174,7 +159,7 @@ public class KernelStartupPanel extends JPanel {
                 layout.setConstraints(check, c);
                 add(check);
                 ++c.gridy;
-                final Component comp = t;
+                final String comp = t;
                 check.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
@@ -186,7 +171,7 @@ public class KernelStartupPanel extends JPanel {
     }
 
     private static final class SpinnerPanel extends JPanel {
-        private SpinnerPanel(Collection<? extends Component> available, final KernelStartupOptions options) {
+        private SpinnerPanel(Collection<String> available, final KernelStartupOptions options) {
             GridBagLayout layout = new GridBagLayout();
             GridBagConstraints c = new GridBagConstraints();
             c.gridx = 0;
@@ -196,10 +181,10 @@ public class KernelStartupPanel extends JPanel {
             c.fill = GridBagConstraints.BOTH;
             c.anchor = GridBagConstraints.CENTER;
             setLayout(layout);
-            for (Component t : available) {
+            for (String t : available) {
                 c.gridx = 0;
                 c.weightx = 1;
-                JLabel l = new JLabel(t.getName());
+                JLabel l = new JLabel(t);
                 layout.setConstraints(l, c);
                 add(l);
                 int count = options.getInstanceCount(t);
@@ -208,7 +193,7 @@ public class KernelStartupPanel extends JPanel {
                 final JCheckBox check = new JCheckBox("Maximum");
                 check.setSelected(all);
                 spinner.setEnabled(!all);
-                final Component comp = t;
+                final String comp = t;
                 check.addChangeListener(new ChangeListener() {
                         @Override
                         public void stateChanged(ChangeEvent e) {

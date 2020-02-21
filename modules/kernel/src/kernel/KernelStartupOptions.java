@@ -1,23 +1,24 @@
 package kernel;
 
-import static rescuecore2.misc.java.JavaTools.instantiate;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collection;
-import java.util.Collections;
-
-import rescuecore2.misc.Pair;
-import rescuecore2.config.Config;
+import rescuecore2.components.Agent;
 import rescuecore2.components.Component;
 import rescuecore2.components.Simulator;
 import rescuecore2.components.Viewer;
-import rescuecore2.components.Agent;
+import rescuecore2.config.Config;
 import rescuecore2.log.Logger;
+import rescuecore2.misc.Pair;
+import rescuecore2.misc.java.JavaTools;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static rescuecore2.misc.java.JavaTools.instantiate;
 
 /**
    Container class for all kernel startup options.
@@ -29,10 +30,10 @@ public class KernelStartupOptions {
     private List<Perception> perceptionOptions;
     private List<CommunicationModel> commsOptions;
 
-    private Map<Simulator, Integer> sims;
-    private Map<Viewer, Integer> viewers;
-    private Map<Agent, Integer> agents;
-    private Map<Component, Integer> other;
+    private Map<String, Integer> sims;
+    private Map<String, Integer> viewers;
+    private Map<String, Integer> agents;
+    private Map<String, Integer> other;
 
     private WorldModelCreator world;
     private Perception perception;
@@ -67,17 +68,17 @@ public class KernelStartupOptions {
     */
     public Collection<Pair<String, Integer>> getInlineComponents() {
         List<Pair<String, Integer>> result = new ArrayList<Pair<String, Integer>>();
-        for (Map.Entry<Simulator, Integer> next : sims.entrySet()) {
-            result.add(new Pair<String, Integer>(next.getKey().getClass().getName(), next.getValue()));
+        for (Map.Entry<String, Integer> next : sims.entrySet()) {
+            result.add(new Pair<String, Integer>(next.getKey(), next.getValue()));
         }
-        for (Map.Entry<Viewer, Integer> next : viewers.entrySet()) {
-            result.add(new Pair<String, Integer>(next.getKey().getClass().getName(), next.getValue()));
+        for (Map.Entry<String, Integer> next : viewers.entrySet()) {
+            result.add(new Pair<String, Integer>(next.getKey(), next.getValue()));
         }
-        for (Map.Entry<Agent, Integer> next : agents.entrySet()) {
-            result.add(new Pair<String, Integer>(next.getKey().getClass().getName(), next.getValue()));
+        for (Map.Entry<String, Integer> next : agents.entrySet()) {
+            result.add(new Pair<String, Integer>(next.getKey(), next.getValue()));
         }
-        for (Map.Entry<Component, Integer> next : other.entrySet()) {
-            result.add(new Pair<String, Integer>(next.getKey().getClass().getName(), next.getValue()));
+        for (Map.Entry<String, Integer> next : other.entrySet()) {
+            result.add(new Pair<String, Integer>(next.getKey(), next.getValue()));
         }
         return result;
     }
@@ -158,7 +159,7 @@ public class KernelStartupOptions {
        Get the list of available Simulator components.
        @return All known Simulators.
     */
-    public Collection<Simulator> getAvailableSimulators() {
+    public Collection<String> getAvailableSimulators() {
         return Collections.unmodifiableSet(sims.keySet());
     }
 
@@ -166,7 +167,7 @@ public class KernelStartupOptions {
        Get the list of available Viewer components.
        @return All known Viewers.
     */
-    public Collection<Viewer> getAvailableViewers() {
+    public Collection<String> getAvailableViewers() {
         return Collections.unmodifiableSet(viewers.keySet());
     }
 
@@ -174,7 +175,7 @@ public class KernelStartupOptions {
        Get the list of available Agent components.
        @return All known Agents.
     */
-    public Collection<Agent> getAvailableAgents() {
+    public Collection<String> getAvailableAgents() {
         return Collections.unmodifiableSet(agents.keySet());
     }
 
@@ -182,7 +183,7 @@ public class KernelStartupOptions {
        Get the list of available components that are not simulators, viewers or agents.
        @return All known Components that are not simulators, viewers or agents.
     */
-    public Collection<Component> getAvailableComponents() {
+    public Collection<String> getAvailableComponents() {
         return Collections.unmodifiableSet(other.keySet());
     }
 
@@ -191,7 +192,7 @@ public class KernelStartupOptions {
        @param c The component type.
        @return The number of instances to start.
     */
-    public int getInstanceCount(Component c) {
+    public int getInstanceCount(String c) {
         if (sims.containsKey(c)) {
             return sims.get(c);
         }
@@ -212,18 +213,20 @@ public class KernelStartupOptions {
        @param c The component type.
        @param count The number of instances to start.
     */
-    public void setInstanceCount(Component c, int count) {
-        if (c instanceof Simulator) {
-            sims.put((Simulator)c, count);
+    public void setInstanceCount(String c, int count) {
+        if (sims.containsKey(c)) {
+            sims.put(c, count);
         }
-        else if (c instanceof Viewer) {
-            viewers.put((Viewer)c, count);
+        else if (viewers.containsKey(c)) {
+            viewers.put(c, count);
         }
-        else if (c instanceof Agent) {
-            agents.put((Agent)c, count);
+        else if (agents.containsKey(c)) {
+            agents.put(c, count);
         }
-        else {
+        else if (other.containsKey(c)) {
             other.put(c, count);
+        } else {
+            throw new IllegalArgumentException("Component " + c + " not recognised");
         }
     }
 
@@ -253,19 +256,18 @@ public class KernelStartupOptions {
         return new Pair<List<T>, Integer>(instances, selectedIndex);
     }
 
-    private <T> Map<T, Integer> createComponentOptions(Config config, String key, Class<T> expectedClass) {
+    private <T> Map<String, Integer> createComponentOptions(Config config, String key, Class<T> expectedClass) {
         Logger.trace("Loading component options: " + key);
-        Map<T, Integer> result = new HashMap<T, Integer>();
+        Map<String, Integer> result = new HashMap<>();
         List<String> classNames = config.getArrayValue(key, "");
         List<String> autoClassNames = config.getArrayValue(key + AUTO_SUFFIX, "");
         Set<String> allClassNames = new HashSet<String>(classNames);
         allClassNames.addAll(strip(autoClassNames));
         for (String next : allClassNames) {
             Logger.trace("Option found: '" + next + "'");
-            T t = instantiate(next, expectedClass);
-            if (t != null) {
+            if (JavaTools.doesClassExist(next, expectedClass)) {
                 int count = getStartCount(next, autoClassNames);
-                result.put(t, count);
+                result.put(next, count);
             }
         }
         return result;

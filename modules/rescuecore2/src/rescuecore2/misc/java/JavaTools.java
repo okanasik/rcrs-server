@@ -1,9 +1,9 @@
 package rescuecore2.misc.java;
 
+import rescuecore2.log.Logger;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-
-import rescuecore2.log.Logger;
 
 /**
    A set of useful functions related to the Java language.
@@ -90,5 +90,20 @@ public final class JavaTools {
             Logger.info("Could not instantiate class " + classname);
         }
         return null;
+    }
+
+    public static boolean doesClassExist(String className, Class baseClass) {
+        try {
+            Class compClass = Class.forName(className);
+            if (baseClass.isAssignableFrom(compClass)) {
+                return true;
+            } else {
+                Logger.error(className + " is not subclass of " + baseClass.getName());
+                return false;
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.error("ClassNotFound:" + className);
+            return false;
+        }
     }
 }
