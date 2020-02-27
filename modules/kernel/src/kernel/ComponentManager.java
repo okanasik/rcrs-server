@@ -378,6 +378,13 @@ public class ComponentManager implements ConnectionManagerListener,
 					Logger.debug("No suitable entities found");
 					// Send an error
 					reply = new KAConnectError(requestID, "No more agents");
+                    try {
+                        connection.sendMessage(reply);
+                    } catch (ConnectionException e) {
+                        Logger.error("Error sending reply", e);
+                    } finally {
+                        connection.shutdown();
+                    }
 				} else {
 					Logger.debug("Found entity to control: " + result);
 					Entity entity = result.entity;
@@ -391,15 +398,14 @@ public class ComponentManager implements ConnectionManagerListener,
 					// Send an OK
 					reply = new KAConnectOK(requestID, entity.getID(),
 							result.visibleSet, result.config);
+                    try {
+                        connection.sendMessage(reply);
+                    } catch (ConnectionException e) {
+                        Logger.error("Error sending reply", e);
+                    }
 				}
 			}
-			if (reply != null) {
-				try {
-					connection.sendMessage(reply);
-				} catch (ConnectionException e) {
-					Logger.error("Error sending reply", e);
-				}
-			}
+
 			updateGUIUncontrolledAgents();
 			updateGUIAgentAck();
 		}

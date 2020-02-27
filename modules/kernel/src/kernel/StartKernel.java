@@ -1,31 +1,10 @@
 package kernel;
 
-import static rescuecore2.misc.java.JavaTools.instantiate;
-import static rescuecore2.misc.java.JavaTools.instantiateFactory;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import org.dom4j.DocumentException;
 import kernel.ui.KernelGUI;
 import kernel.ui.KernelStartupPanel;
 import kernel.ui.ScoreGraph;
 import kernel.ui.ScoreTable;
+import org.dom4j.DocumentException;
 import rescuecore2.Constants;
 import rescuecore2.GUIComponent;
 import rescuecore2.components.Component;
@@ -54,6 +33,21 @@ import rescuecore2.scenario.Scenario;
 import rescuecore2.score.ScoreFunction;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.WorldModel;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+
+import static rescuecore2.misc.java.JavaTools.instantiate;
+import static rescuecore2.misc.java.JavaTools.instantiateFactory;
 
 /**
  * A class for launching the kernel.
@@ -364,34 +358,39 @@ public final class StartKernel {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			waitThread.interrupt();
-			if (timeoutThread != null) {
-				timeoutThread.interrupt();
-			}
 			throw new KernelException("Interrupted");
-		}
+		} finally {
+            waitThread.interrupt();
+            if (timeoutThread != null) {
+                timeoutThread.interrupt();
+            }
+        }
 	}
 
 	private static void autostartComponents(KernelInfo info, Registry registry,
 			KernelGUI gui, Config config) throws InterruptedException {
 		KernelStartupOptions options = info.options;
-		Collection<Callable<Void>> all = new ArrayList<Callable<Void>>();
+//		Collection<Callable<Void>> all = new ArrayList<Callable<Void>>();
 		Config launchConfig = new Config(config);
 		// keeps only random seed
 		launchConfig.removeExcept(Constants.RANDOM_SEED_KEY,
 				Constants.RANDOM_CLASS_KEY);
 		for (Pair<String, Integer> next : options.getInlineComponents()) {
 			if (next.second() > 0) {
-				all.add(new ComponentStarter(next.first(),
-						info.componentManager, next.second(), registry, gui,
-						launchConfig));
+//				all.add(new ComponentStarter(next.first(),
+//						info.componentManager, next.second(), registry, gui,
+//						launchConfig));
+                ComponentStarter cs = new ComponentStarter(next.first(),
+                        info.componentManager, next.second(), registry, gui,
+                        launchConfig);
+                cs.call();
 			}
 		}
-		ExecutorService service = Executors.newFixedThreadPool(Runtime
-				.getRuntime().availableProcessors());
-		service.invokeAll(all);
-		// shutdown the pool when all threads exits
-		service.shutdown();
+//		ExecutorService service = Executors.newFixedThreadPool(Runtime
+//				.getRuntime().availableProcessors());
+//		service.invokeAll(all);
+//		// shutdown the pool when all threads exits
+//		service.shutdown();
 	}
 
 	private static void registerInitialAgents(Config config,

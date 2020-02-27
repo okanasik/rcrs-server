@@ -1,41 +1,35 @@
 package kernel;
 
 
-import java.util.Collections;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.List;
-import java.util.ArrayList;
-import java.io.IOException;
-import java.io.File;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Callable;
-
+import rescuecore2.Constants;
+import rescuecore2.Timestep;
 import rescuecore2.config.Config;
+import rescuecore2.log.CommandsRecord;
+import rescuecore2.log.ConfigRecord;
+import rescuecore2.log.EndLogRecord;
+import rescuecore2.log.FileLogWriter;
+import rescuecore2.log.InitialConditionsRecord;
+import rescuecore2.log.LogException;
+import rescuecore2.log.LogWriter;
+import rescuecore2.log.Logger;
+import rescuecore2.log.PerceptionRecord;
+import rescuecore2.log.StartLogRecord;
+import rescuecore2.log.UpdatesRecord;
+import rescuecore2.messages.Command;
+import rescuecore2.score.ScoreFunction;
+import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.worldmodel.ChangeSet;
-import rescuecore2.messages.Command;
-import rescuecore2.Constants;
-import rescuecore2.Timestep;
-import rescuecore2.score.ScoreFunction;
-//import rescuecore2.misc.gui.ChangeSetComponent;
 
-import rescuecore2.log.LogWriter;
-import rescuecore2.log.FileLogWriter;
-import rescuecore2.log.InitialConditionsRecord;
-import rescuecore2.log.StartLogRecord;
-import rescuecore2.log.EndLogRecord;
-import rescuecore2.log.ConfigRecord;
-import rescuecore2.log.PerceptionRecord;
-import rescuecore2.log.CommandsRecord;
-import rescuecore2.log.UpdatesRecord;
-import rescuecore2.log.LogException;
-import rescuecore2.log.Logger;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+//import rescuecore2.misc.gui.ChangeSetComponent;
 
 /**
    The Robocup Rescue kernel.
@@ -396,41 +390,45 @@ public class Kernel {
                 return;
             }
             Logger.info("Kernel is shutting down");
-            ExecutorService service = Executors.newFixedThreadPool(agents.size() + sims.size() + viewers.size());
-            List<Callable<Object>> callables = new ArrayList<Callable<Object>>();
+//            ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+//            List<Callable<Object>> callables = new ArrayList<Callable<Object>>();
             for (AgentProxy next : agents) {
                 final AgentProxy proxy = next;
-                callables.add(Executors.callable(new Runnable() {
-                        @Override
-                        public void run() {
-                            proxy.shutdown();
-                        }
-                    }));
+//                callables.add(Executors.callable(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            proxy.shutdown();
+//                        }
+//                    }));
+                proxy.shutdown();
             }
             for (SimulatorProxy next : sims) {
                 final SimulatorProxy proxy = next;
-                callables.add(Executors.callable(new Runnable() {
-                        @Override
-                        public void run() {
-                            proxy.shutdown();
-                        }
-                    }));
+//                callables.add(Executors.callable(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            proxy.shutdown();
+//                        }
+//                    }));
+                proxy.shutdown();
             }
             for (ViewerProxy next : viewers) {
                 final ViewerProxy proxy = next;
-                callables.add(Executors.callable(new Runnable() {
-                        @Override
-                        public void run() {
-                            proxy.shutdown();
-                        }
-                    }));
+//                callables.add(Executors.callable(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            proxy.shutdown();
+//                        }
+//                    }));
+                proxy.shutdown();
             }
-            try {
-                service.invokeAll(callables);
-            }
-            catch (InterruptedException e) {
-                Logger.warn("Interrupted during shutdown");
-            }
+//            try {
+//                service.invokeAll(callables);
+//                service.shutdown();
+//            }
+//            catch (InterruptedException e) {
+//                Logger.warn("Interrupted during shutdown");
+//            }
             try {
                 log.writeRecord(new EndLogRecord());
                 log.close();

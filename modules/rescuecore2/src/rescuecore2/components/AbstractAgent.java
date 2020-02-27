@@ -160,6 +160,7 @@ public abstract class AbstractAgent<T extends WorldModel<? extends Entity>, E ex
             if (error.getRequestID() == requestID) {
                 c.removeConnectionListener(this);
                 failureReason = new ComponentConnectionException(error.getReason());
+                c.shutdown();
                 latch.countDown();
             }
         }

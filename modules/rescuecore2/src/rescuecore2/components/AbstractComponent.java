@@ -4,13 +4,13 @@ import rescuecore2.config.Config;
 import rescuecore2.connection.Connection;
 import rescuecore2.connection.ConnectionException;
 import rescuecore2.connection.ConnectionListener;
+import rescuecore2.log.Logger;
 import rescuecore2.messages.Message;
 import rescuecore2.messages.control.Shutdown;
-import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.worldmodel.Entity;
-import rescuecore2.log.Logger;
 import rescuecore2.misc.WorkerThread;
 import rescuecore2.registry.Registry;
+import rescuecore2.worldmodel.Entity;
+import rescuecore2.worldmodel.WorldModel;
 
 import java.util.Collection;
 import java.util.Random;
@@ -132,6 +132,7 @@ public abstract class AbstractComponent<T extends WorldModel<? extends Entity>> 
     public void shutdown() {
         try {
             processor.kill();
+            connection.shutdown();
         }
         catch (InterruptedException e) {
             e.printStackTrace();
