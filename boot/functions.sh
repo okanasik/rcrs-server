@@ -162,8 +162,15 @@ function execute {
 
 # Start the kernel
 function startKernel {
-    KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log $*"
-    makeClasspath $BASEDIR/jars $BASEDIR/lib
+	if [ -z $TEAM ]
+	then
+		echo "TEAM is empty. Please run with -t <teamname>";
+		return;
+	else
+		echo "Running team $TEAM."
+	fi
+    KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log --kernel.team=$TEAM $*"
+    makeClasspath $BASEDIR/jars $BASEDIR/lib $BASEDIR/teamjars
 
 	java -Xmx2048m -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS
     #execute kernel "java -Xmx2048m -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS"
