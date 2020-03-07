@@ -1,19 +1,19 @@
 package kernel;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.ArrayList;
-
 import rescuecore2.connection.Connection;
 import rescuecore2.connection.ConnectionListener;
-import rescuecore2.messages.Message;
+import rescuecore2.log.Logger;
 import rescuecore2.messages.Command;
+import rescuecore2.messages.Message;
 import rescuecore2.messages.control.KASense;
+import rescuecore2.misc.collections.LazyMap;
+import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.ChangeSet;
-import rescuecore2.log.Logger;
-import rescuecore2.misc.collections.LazyMap;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 /**
    This class is the kernel interface to an agent.
@@ -59,12 +59,14 @@ public class AgentProxy extends AbstractKernelComponent {
        @return A collection of messages representing the commands
      */
     public Collection<Command> getAgentCommands(int timestep) {
-        Collection<Command> result;
         synchronized (commands) {
-            result = commands.get(timestep);
+            Collection<Command> result = commands.get(timestep);
+            synchronized (result) {
+                Logger.trace(entity.toString() + " getAgentCommands(" + timestep + ") returning " + result);
+                result.notifyAll();
+            }
+            return result;
         }
-        Logger.trace(entity.toString() + " getAgentCommands(" + timestep + ") returning " + result);
-        return result;
     }
 
     /**
@@ -92,7 +94,10 @@ public class AgentProxy extends AbstractKernelComponent {
         Logger.trace("AgentProxy " + entity + " received " + c);
         synchronized (commands) {
             Collection<Command> result = commands.get(time);
-            result.add(c);
+            synchronized (result) {
+                result.add(c);
+                result.notifyAll();
+            }
             commands.notifyAll();
         }
     }

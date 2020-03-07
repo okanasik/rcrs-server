@@ -38,12 +38,15 @@ public class StandardCommandCollector implements CommandCollector {
         while (!waiting.isEmpty()) {
             for (AgentProxy next : agents) {
                 Collection<Command> commands = next.getAgentCommands(timestep);
-                for (Command c : commands) {
-                    if (isTriggerCommand(c)) {
-                        Logger.debug(next + " sent a trigger command");
-                        waiting.remove(next);
-                        break;
+                synchronized (commands) {
+                    for (Command c : commands) {
+                        if (isTriggerCommand(c)) {
+                            Logger.debug(next + " sent a trigger command");
+                            waiting.remove(next);
+                            break;
+                        }
                     }
+                    commands.notifyAll();
                 }
             }
             Logger.info(this + " waiting for commands from " + waiting.size() + " agents");

@@ -3,6 +3,7 @@ package rescuecore2.misc.java;
 import rescuecore2.log.Logger;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 /**
@@ -24,7 +25,7 @@ public final class JavaTools {
             if (Modifier.isAbstract(clazz.getModifiers())) {
                 return null;
             }
-            return clazz.newInstance();
+            return clazz.getDeclaredConstructor().newInstance();
         }
         catch (ClassNotFoundException e) {
             Logger.info("Could not find class " + className);
@@ -33,6 +34,38 @@ public final class JavaTools {
             Logger.info("Could not instantiate class " + className);
         }
         catch (InstantiationException e) {
+            Logger.info("Could not instantiate class " + className);
+        }
+        catch (NoSuchMethodException e) {
+            Logger.info("Could not instantiate class " + className);
+        }
+        catch (InvocationTargetException e) {
+            Logger.info("Could not instantiate class " + className);
+        }
+        return null;
+    }
+
+    public static Object instantiate(String className) {
+        try {
+            Class clazz = Class.forName(className);
+            if (Modifier.isAbstract(clazz.getModifiers())) {
+                return null;
+            }
+            return clazz.getDeclaredConstructor().newInstance();
+        }
+        catch (ClassNotFoundException e) {
+            Logger.info("Could not find class " + className);
+        }
+        catch (IllegalAccessException e) {
+            Logger.info("Could not instantiate class " + className);
+        }
+        catch (InstantiationException e) {
+            Logger.info("Could not instantiate class " + className);
+        }
+        catch (NoSuchMethodException e) {
+            Logger.info("Could not instantiate class " + className);
+        }
+        catch (InvocationTargetException e) {
             Logger.info("Could not instantiate class " + className);
         }
         return null;

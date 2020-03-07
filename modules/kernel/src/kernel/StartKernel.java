@@ -41,6 +41,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -204,7 +207,9 @@ public final class StartKernel {
 				waitForComponentManager(kernelInfo, config);
 				Kernel kernel = kernelInfo.kernel;
 				while (!kernel.hasTerminated()) {
+                    Logger.error("Timestep: " + kernel.getTime() + " started.");
 					kernel.timestep();
+                    Logger.error("Timestep: " + kernel.getTime() + " ended.");
 				}
 				kernel.shutdown();
 			}
@@ -374,7 +379,7 @@ public final class StartKernel {
 		Config launchConfig = new Config(config);
 		// keeps only random seed
 		launchConfig.removeExcept(Constants.RANDOM_SEED_KEY,
-				Constants.RANDOM_CLASS_KEY);
+				Constants.RANDOM_CLASS_KEY, "kernel.team");
 		for (Pair<String, Integer> next : options.getInlineComponents()) {
 			if (next.second() > 0) {
 //				all.add(new ComponentStarter(next.first(),
@@ -530,6 +535,7 @@ public final class StartKernel {
 						+ "...");
 				try {
 					c.initialise();
+					initializeADFAgent(c, config);
 					launcher.connect(c);
 					if (gui != null && c instanceof GUIComponent) {
 						gui.addGUIComponent((GUIComponent) c);
@@ -551,6 +557,122 @@ public final class StartKernel {
 			return null;
 		}
 	}
+
+	private static void initializeADFAgent(Component comp, Config config) {
+	    String compClassName = comp.getClass().getCanonicalName();
+	    Object tactics = null;
+        String dataStorageFileName = "";
+
+        boolean isPlatoon = compClassName.substring(compClassName.lastIndexOf('.')+1).startsWith("Platoon");
+
+        if (compClassName.endsWith("PlatoonFire")) {
+	        tactics = instantiate("adf.sample.tactics.SampleTacticsFireBrigade");
+	        dataStorageFileName = "fire.bin";
+        } else if (compClassName.endsWith("PlatoonPolice")) {
+            tactics = instantiate("adf.sample.tactics.SampleTacticsPoliceForce");
+            dataStorageFileName = "police.bin";
+        } else if (compClassName.endsWith("PlatoonAmbulance")) {
+            tactics = instantiate("adf.sample.tactics.SampleTacticsAmbulanceTeam");
+            dataStorageFileName = "ambulance.bin";
+        } else if (compClassName.endsWith("OfficeFire")) {
+            tactics = instantiate("adf.sample.tactics.SampleTacticsFireStation");
+            dataStorageFileName = "fire.bin";
+        } else if (compClassName.endsWith("OfficePolice")) {
+            tactics = instantiate("adf.sample.tactics.SampleTacticsPoliceOffice");
+            dataStorageFileName = "police.bin";
+        } else if (compClassName.endsWith("OfficeAmbulance")) {
+            tactics = instantiate("adf.sample.tactics.SampleTacticsAmbulanceCentre");
+            dataStorageFileName = "ambulance.bin";
+        } else {
+	        // since it is not one of the adf agent just return without calling init method
+	        return;
+        }
+
+        Class tacticsClass = Object.class;
+        Class moduleConfigClass = Object.class;
+        Class developDataClass = Object.class;
+        try {
+            if (isPlatoon) {
+                tacticsClass = Class.forName("adf.component.tactics.Tactics");
+            } else {
+                tacticsClass = Class.forName("adf.component.tactics.TacticsCenter");
+            }
+            moduleConfigClass = Class.forName("adf.agent.config.ModuleConfig");
+            developDataClass = Class.forName("adf.agent.develop.DevelopData");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        boolean isPrecompute = false;
+        boolean isDebug = false;
+        Object moduleConfig = createModuleConfig(config);
+        Object developData = createDevelopData(config);
+        try {
+            Class agentClass;
+            if (isPlatoon) {
+                agentClass = Class.forName("adf.agent.platoon.Platoon");
+            } else {
+                agentClass = Class.forName("adf.agent.office.Office");
+            }
+
+            Method m = agentClass.getDeclaredMethod("init", tacticsClass, Boolean.TYPE, String.class,
+                        Boolean.TYPE, moduleConfigClass, developDataClass);
+            m.invoke(comp, tactics, isPrecompute, dataStorageFileName, isDebug, moduleConfig, developData);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Object createModuleConfig(Config config) {
+        Class clazz = null;
+        Object moduleConfig = null;
+        try {
+            clazz = Class.forName("adf.agent.config.ModuleConfig");
+            Constructor constructor = clazz.getConstructor(String.class, List.class);
+            List emptyList = new ArrayList();
+            moduleConfig = constructor.newInstance("config/teams/" + config.getValue("kernel.team")+"/module.cfg", emptyList);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return moduleConfig;
+    }
+
+    private static Object createDevelopData(Config config) {
+        Class clazz = null;
+        Object developData = null;
+        try {
+            clazz = Class.forName("adf.agent.develop.DevelopData");
+            Constructor constructor = clazz.getConstructor(Boolean.TYPE, String.class, List.class);
+            List emptyList = new ArrayList();
+            developData = constructor.newInstance(false,
+                    "data/" + config.getValue("kernel.team")+"/develop.json", emptyList);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return developData;
+    }
 
 	private static class KernelInfo {
 		Kernel kernel;
