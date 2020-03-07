@@ -1,21 +1,20 @@
 package rescuecore2.messages.components;
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.writeInt32;
-import static rescuecore2.misc.EncodingTools.readEntity;
-import static rescuecore2.misc.EncodingTools.writeEntity;
-
 import rescuecore2.messages.AbstractMessageComponent;
+import rescuecore2.worldmodel.Entity;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collection;
-
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import rescuecore2.worldmodel.Entity;
+import static rescuecore2.misc.EncodingTools.readEntity;
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.writeEntity;
+import static rescuecore2.misc.EncodingTools.writeInt32;
 
 /**
    An EntityList component to a message.
@@ -67,6 +66,14 @@ public class EntityListComponent extends AbstractMessageComponent {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        writeInt32(entities.size(), out);
+        for (Entity next : entities) {
+            writeEntity(next, out);
+        }
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         entities.clear();
         int size = readInt32(in);
@@ -81,5 +88,18 @@ public class EntityListComponent extends AbstractMessageComponent {
     @Override
     public String toString() {
         return getName() + " = " + entities.size() + " entities";
+    }
+
+    @Override
+    public int getBytesLength() {
+        int total = 4; // the size of the entity list
+        for (Entity e : entities) {
+            total += 4; // entity urn string length
+            total += e.getURN().length();
+            total += 4; // entityid integer
+            total += 4; // size of the entity content
+            total += e.getBytesLength();
+        }
+        return total;
     }
 }

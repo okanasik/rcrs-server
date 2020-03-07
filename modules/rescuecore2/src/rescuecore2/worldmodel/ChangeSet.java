@@ -1,11 +1,11 @@
 package rescuecore2.worldmodel;
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.readProperty;
-import static rescuecore2.misc.EncodingTools.readString;
-import static rescuecore2.misc.EncodingTools.writeInt32;
-import static rescuecore2.misc.EncodingTools.writeProperty;
-import static rescuecore2.misc.EncodingTools.writeString;
+import rescuecore2.log.Logger;
+import rescuecore2.misc.collections.LazyMap;
+import rescuecore2.standard.entities.StandardPropertyURN;
+import rescuecore2.worldmodel.properties.EntityRefListProperty;
+
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,10 +15,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import rescuecore2.log.Logger;
-import rescuecore2.misc.collections.LazyMap;
-import rescuecore2.standard.entities.StandardPropertyURN;
-import rescuecore2.worldmodel.properties.EntityRefListProperty;
+
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.readProperty;
+import static rescuecore2.misc.EncodingTools.readString;
+import static rescuecore2.misc.EncodingTools.writeInt32;
+import static rescuecore2.misc.EncodingTools.writeProperty;
+import static rescuecore2.misc.EncodingTools.writeString;
 
 /**
  * This class is used for accumulating changes to entities.
@@ -260,6 +263,27 @@ public class ChangeSet {
     }
   }
 
+    public void write(DataOutput out ) throws IOException {
+        // Number of entity IDs
+        writeInt32( changes.size(), out );
+        for ( Map.Entry<EntityID, Map<String, Property>> next : changes
+                .entrySet() ) {
+            EntityID id = next.getKey();
+            Collection<Property> props = next.getValue().values();
+            // EntityID, URN, number of properties
+            writeInt32( id.getValue(), out );
+            writeString( getEntityURN( id ), out );
+            writeInt32( props.size(), out );
+            for ( Property prop : props ) {
+                writeProperty( prop, out );
+            }
+        }
+        writeInt32( deleted.size(), out );
+        for ( EntityID next : deleted ) {
+            writeInt32( next.getValue(), out );
+        }
+    }
+
 
   /**
    * Read this ChangeSet from a stream.
@@ -341,5 +365,9 @@ public class ChangeSet {
     for ( Iterator<EntityID> it = deleted.iterator(); it.hasNext(); ) {
       Logger.debug( "  Deleted: " + it.next() );
     }
+  }
+
+  public Map<EntityID, Map<String, Property>> getChangeMap() {
+      return changes;
   }
 }

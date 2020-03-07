@@ -1,17 +1,18 @@
 package rescuecore2.messages.components;
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.writeInt32;
-
 import rescuecore2.messages.AbstractMessageComponent;
 import rescuecore2.worldmodel.EntityID;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.writeInt32;
 
 /**
    A message component that is a list of entity IDs.
@@ -63,6 +64,14 @@ public class EntityIDListComponent extends AbstractMessageComponent {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        writeInt32(ids.size(), out);
+        for (EntityID next : ids) {
+            writeInt32(next.getValue(), out);
+        }
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         ids.clear();
         int count = readInt32(in);
@@ -74,5 +83,10 @@ public class EntityIDListComponent extends AbstractMessageComponent {
     @Override
     public String toString() {
         return getName() + " = " + ids.toString();
+    }
+
+    @Override
+    public int getBytesLength() {
+        return 4 * (ids.size() + 1);
     }
 }

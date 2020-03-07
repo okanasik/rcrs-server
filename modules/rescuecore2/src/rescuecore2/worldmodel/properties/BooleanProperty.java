@@ -1,14 +1,15 @@
 package rescuecore2.worldmodel.properties;
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.writeInt32;
+import rescuecore2.worldmodel.AbstractProperty;
+import rescuecore2.worldmodel.Property;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 
-import rescuecore2.worldmodel.Property;
-import rescuecore2.worldmodel.AbstractProperty;
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.writeInt32;
 
 /**
    A boolean property.
@@ -105,6 +106,11 @@ public class BooleanProperty extends AbstractProperty {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        writeInt32(value ? 1 : 0, out);
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         setValue(readInt32(in) != 0);
     }
@@ -112,5 +118,10 @@ public class BooleanProperty extends AbstractProperty {
     @Override
     public BooleanProperty copy() {
         return new BooleanProperty(this);
+    }
+
+    @Override
+    public int getBytesLength() {
+        return 4;
     }
 }

@@ -1,18 +1,19 @@
 package rescuecore2.standard.entities;
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.writeInt32;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
-import rescuecore2.worldmodel.Property;
 import rescuecore2.worldmodel.AbstractProperty;
 import rescuecore2.worldmodel.EntityID;
+import rescuecore2.worldmodel.Property;
+
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.writeInt32;
 
 /**
    A property that defines a list of Edges.
@@ -135,6 +136,23 @@ public class EdgeListProperty extends AbstractProperty {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        writeInt32(edges.size(), out);
+        for (Edge next : edges) {
+            writeInt32(next.getStartX(), out);
+            writeInt32(next.getStartY(), out);
+            writeInt32(next.getEndX(), out);
+            writeInt32(next.getEndY(), out);
+            if (next.isPassable()) {
+                writeInt32(next.getNeighbour().getValue(), out);
+            }
+            else {
+                writeInt32(0, out);
+            }
+        }
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         int count = readInt32(in);
         edges.clear();
@@ -178,5 +196,12 @@ public class EdgeListProperty extends AbstractProperty {
     @Override
     public EdgeListProperty copy() {
         return new EdgeListProperty(this);
+    }
+
+    @Override
+    public int getBytesLength() {
+        int total = 4; // the count of edges
+        total += (20 * edges.size());
+        return total;
     }
 }

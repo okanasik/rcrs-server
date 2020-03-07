@@ -1,13 +1,14 @@
 package rescuecore2.messages.components;
 
-import static rescuecore2.misc.EncodingTools.readString;
-import static rescuecore2.misc.EncodingTools.writeString;
-
 import rescuecore2.messages.AbstractMessageComponent;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+
+import static rescuecore2.misc.EncodingTools.readString;
+import static rescuecore2.misc.EncodingTools.writeString;
 
 /**
    A string component to a message.
@@ -56,6 +57,11 @@ public class StringComponent extends AbstractMessageComponent {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        writeString(value, out);
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         value = readString(in);
     }
@@ -63,5 +69,10 @@ public class StringComponent extends AbstractMessageComponent {
     @Override
     public String toString() {
         return getName() + " = " + value;
+    }
+
+    @Override
+    public int getBytesLength() {
+        return 4 + value.length();
     }
 }

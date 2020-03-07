@@ -1,17 +1,18 @@
 package rescuecore2.worldmodel.properties;
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.writeInt32;
+import rescuecore2.worldmodel.AbstractProperty;
+import rescuecore2.worldmodel.Property;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import rescuecore2.worldmodel.Property;
-import rescuecore2.worldmodel.AbstractProperty;
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.writeInt32;
 
 /**
    An integer-array property.
@@ -137,6 +138,14 @@ public class IntArrayProperty extends AbstractProperty {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        writeInt32(data.size(), out);
+        for (Integer next : data) {
+            writeInt32(next.intValue(), out);
+        }
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         int size = readInt32(in);
         int[] result = new int[size];
@@ -169,5 +178,10 @@ public class IntArrayProperty extends AbstractProperty {
     @Override
     public IntArrayProperty copy() {
         return new IntArrayProperty(this);
+    }
+
+    @Override
+    public int getBytesLength() {
+        return 4 * (data.size()+1);
     }
 }

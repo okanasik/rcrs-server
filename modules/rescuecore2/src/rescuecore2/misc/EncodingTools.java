@@ -1,20 +1,19 @@
 package rescuecore2.misc;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.EOFException;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.Charset;
-
+import rescuecore2.messages.Message;
+import rescuecore2.registry.Registry;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.Property;
-import rescuecore2.messages.Message;
-import rescuecore2.registry.Registry;
+
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 /**
  * A bunch of useful tools for encoding and decoding things like integers.
@@ -646,20 +645,15 @@ public final class EncodingTools {
 	 */
 	public static void writeEntity(Entity e, OutputStream out)
 			throws IOException {
-		// Type URN, entityID, size, content
-		// Gather the content first
-		ByteArrayOutputStream gather = new ByteArrayOutputStream();
-		e.write(gather);
-		byte[] bytes = gather.toByteArray();
 
 		// Type URN
 		writeString(e.getURN(), out);
 		// EntityID
 		writeInt32(e.getID().getValue(), out);
 		// Size
-		writeInt32(bytes.length, out);
+		writeInt32(e.getBytesLength(), out);
 		// Content
-		out.write(bytes);
+        e.write(out);
 	}
 
 	/**
@@ -674,19 +668,14 @@ public final class EncodingTools {
 	 */
 	public static void writeEntity(Entity e, DataOutput out) throws IOException {
 		// Type URN, entityID, size, content
-		// Gather the content first
-		ByteArrayOutputStream gather = new ByteArrayOutputStream();
-		e.write(gather);
-		byte[] bytes = gather.toByteArray();
-
 		// Type URN
 		writeString(e.getURN(), out);
 		// EntityID
 		writeInt32(e.getID().getValue(), out);
 		// Size
-		writeInt32(bytes.length, out);
+		writeInt32(e.getBytesLength(), out);
 		// Content
-		out.write(bytes);
+        e.write(out);
 	}
 
 	/**
@@ -755,13 +744,10 @@ public final class EncodingTools {
 		writeString(p.getURN(), out);
 		writeBoolean(p.isDefined(), out);
 		if (p.isDefined()) {
-			ByteArrayOutputStream gather = new ByteArrayOutputStream();
-			p.write(gather);
-			byte[] bytes = gather.toByteArray();
 			// Size
-			writeInt32(bytes.length, out);
+			writeInt32(p.getBytesLength(), out);
 			// Data
-			out.write(bytes);
+            p.write(out);
 		}
 	}
 
@@ -781,13 +767,10 @@ public final class EncodingTools {
 		writeString(p.getURN(), out);
 		writeBoolean(p.isDefined(), out);
 		if (p.isDefined()) {
-			ByteArrayOutputStream gather = new ByteArrayOutputStream();
-			p.write(gather);
-			byte[] bytes = gather.toByteArray();
 			// Size
-			writeInt32(bytes.length, out);
+			writeInt32(p.getBytesLength(), out);
 			// Data
-			out.write(bytes);
+            p.write(out);
 		}
 	}
 
@@ -856,17 +839,13 @@ public final class EncodingTools {
 	public static void writeMessage(Message m, OutputStream out)
 			throws IOException {
 		// Type URN, size, content
-		// Gather the content first
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		m.write(bytes);
-		byte[] content = bytes.toByteArray();
 
 		// Type URN
 		writeString(m.getURN(), out);
 		// Size
-		writeInt32(content.length, out);
+		writeInt32(m.getBytesLength(), out);
 		// Content
-		out.write(content);
+        m.write(out);
 	}
 
 	/**
@@ -882,17 +861,13 @@ public final class EncodingTools {
 	public static void writeMessage(Message m, DataOutput out)
 			throws IOException {
 		// Type URN, size, content
-		// Gather the content first
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		m.write(bytes);
-		byte[] content = bytes.toByteArray();
 
 		// Type URN
 		writeString(m.getURN(), out);
 		// Size
-		writeInt32(content.length, out);
+		writeInt32(m.getBytesLength(), out);
 		// Content
-		out.write(content);
+        m.write(out);
 	}
 
 	/**

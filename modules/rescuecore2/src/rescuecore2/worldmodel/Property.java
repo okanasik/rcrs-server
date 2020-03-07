@@ -1,8 +1,9 @@
 package rescuecore2.worldmodel;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 
 /**
    Interface for the properties that make up an entity.
@@ -39,6 +40,8 @@ public interface Property {
      */
     void write(OutputStream out) throws IOException;
 
+    void write(DataOutput out) throws IOException;
+
     /**
        Read this property from a stream.
        @param in The stream to read from.
@@ -57,4 +60,6 @@ public interface Property {
        @return A copy of this property.
     */
     Property copy();
+
+    int getBytesLength();
 }

@@ -1,14 +1,15 @@
 package rescuecore2.worldmodel.properties;
 
-import static rescuecore2.misc.EncodingTools.readDouble;
-import static rescuecore2.misc.EncodingTools.writeDouble;
+import rescuecore2.worldmodel.AbstractProperty;
+import rescuecore2.worldmodel.Property;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 
-import rescuecore2.worldmodel.Property;
-import rescuecore2.worldmodel.AbstractProperty;
+import static rescuecore2.misc.EncodingTools.readDouble;
+import static rescuecore2.misc.EncodingTools.writeDouble;
 
 /**
    A single double-precision floating point number property.
@@ -105,6 +106,11 @@ public class DoubleProperty extends AbstractProperty {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        writeDouble(value, out);
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         setValue(readDouble(in));
     }
@@ -112,5 +118,10 @@ public class DoubleProperty extends AbstractProperty {
     @Override
     public DoubleProperty copy() {
         return new DoubleProperty(this);
+    }
+
+    @Override
+    public int getBytesLength() {
+        return 8;
     }
 }

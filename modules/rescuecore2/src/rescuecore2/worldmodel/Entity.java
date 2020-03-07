@@ -1,10 +1,10 @@
 package rescuecore2.worldmodel;
 
-import java.util.Set;
-
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+import java.util.Set;
 
 /**
    Interface for all objects that live in a WorldModel. Entities are made up of a fixed set of properties. The values of those properties may change but the set of properties may not.
@@ -40,6 +40,8 @@ public interface Entity {
      */
     Set<Property> getProperties();
 
+
+
     /**
        Get a property by urn.
        @param urn The urn to look up.
@@ -54,6 +56,8 @@ public interface Entity {
      */
     void write(OutputStream out) throws IOException;
 
+    void write(DataOutput out) throws IOException;
+
     /**
        Read this Entity from a stream.
        @param in The stream to read from.
@@ -66,4 +70,6 @@ public interface Entity {
        @return A new Entity with the same ID and property values.
      */
     Entity copy();
+
+    int getBytesLength();
 }

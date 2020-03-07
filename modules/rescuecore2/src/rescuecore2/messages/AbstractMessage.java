@@ -1,5 +1,6 @@
 package rescuecore2.messages;
 
+import java.io.DataOutput;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -75,9 +76,25 @@ public abstract class AbstractMessage implements Message {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        for (MessageComponent next : components) {
+            next.write(out);
+        }
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         for (MessageComponent next : components) {
             next.read(in);
         }
+    }
+
+    @Override
+    public int getBytesLength() {
+        int total = 0;
+        for (MessageComponent next : components) {
+            total += next.getBytesLength();
+        }
+        return total;
     }
 }

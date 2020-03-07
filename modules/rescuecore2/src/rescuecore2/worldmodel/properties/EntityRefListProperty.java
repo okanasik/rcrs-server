@@ -1,16 +1,19 @@
 package rescuecore2.worldmodel.properties;
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.writeInt32;
+import rescuecore2.worldmodel.AbstractProperty;
+import rescuecore2.worldmodel.EntityID;
+import rescuecore2.worldmodel.Property;
+
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import rescuecore2.worldmodel.AbstractProperty;
-import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.Property;
+
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.writeInt32;
 
 /**
  * A property that refers to a list of entity IDs.
@@ -172,6 +175,14 @@ public class EntityRefListProperty extends AbstractProperty {
     }
   }
 
+    @Override
+    public void write(DataOutput out ) throws IOException {
+        writeInt32( ids.size(), out );
+        for ( EntityID next : ids ) {
+            writeInt32( next.getValue(), out );
+        }
+    }
+
 
   @Override
   public void read( InputStream in ) throws IOException {
@@ -197,4 +208,9 @@ public class EntityRefListProperty extends AbstractProperty {
   public EntityRefListProperty copy() {
     return new EntityRefListProperty( this );
   }
+
+    @Override
+    public int getBytesLength() {
+        return 4 * (ids.size()+1);
+    }
 }

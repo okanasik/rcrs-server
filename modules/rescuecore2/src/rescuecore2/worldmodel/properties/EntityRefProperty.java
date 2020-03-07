@@ -1,15 +1,16 @@
 package rescuecore2.worldmodel.properties;
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.writeInt32;
-
+import rescuecore2.worldmodel.AbstractProperty;
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.Property;
-import rescuecore2.worldmodel.AbstractProperty;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.writeInt32;
 
 /**
    A property that refers to an entity ID.
@@ -106,6 +107,11 @@ public class EntityRefProperty extends AbstractProperty {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        writeInt32(value.getValue(), out);
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         setValue(new EntityID(readInt32(in)));
     }
@@ -113,5 +119,10 @@ public class EntityRefProperty extends AbstractProperty {
     @Override
     public EntityRefProperty copy() {
         return new EntityRefProperty(this);
+    }
+
+    @Override
+    public int getBytesLength() {
+        return 4;
     }
 }

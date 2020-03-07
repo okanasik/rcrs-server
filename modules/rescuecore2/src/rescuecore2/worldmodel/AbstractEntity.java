@@ -1,18 +1,18 @@
 package rescuecore2.worldmodel;
 
-import static rescuecore2.misc.EncodingTools.writeInt32;
-import static rescuecore2.misc.EncodingTools.writeProperty;
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.readProperty;
-
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collection;
-import java.util.Iterator;
-
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.readProperty;
+import static rescuecore2.misc.EncodingTools.writeInt32;
+import static rescuecore2.misc.EncodingTools.writeProperty;
 
 /**
    Abstract base class for concrete Entity implementations.
@@ -87,6 +87,22 @@ public abstract class AbstractEntity implements Entity {
 
     @Override
     public void write(OutputStream out) throws IOException {
+        int count = 0;
+        for (Property next : getProperties()) {
+            if (next.isDefined()) {
+                ++count;
+            }
+        }
+        writeInt32(count, out);
+        for (Property next : getProperties()) {
+            if (next.isDefined()) {
+                writeProperty(next, out);
+            }
+        }
+    }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
         int count = 0;
         for (Property next : getProperties()) {
             if (next.isDefined()) {
@@ -205,5 +221,20 @@ public abstract class AbstractEntity implements Entity {
         for (EntityListener next : copy) {
             next.propertyChanged(this, p, oldValue, newValue);
         }
+    }
+
+    @Override
+    public int getBytesLength() {
+        int total = 4; // the count of properties
+        for (Property p : properties) {
+            if (p.isDefined()) {
+                total += 4; // urn string length
+                total += p.getURN().length();
+                total += 1; // is defined boolean
+                total += 4; // size of the property
+                total += p.getBytesLength();
+            }
+        }
+        return total;
     }
 }

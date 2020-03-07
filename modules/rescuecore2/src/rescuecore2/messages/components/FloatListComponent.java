@@ -1,21 +1,20 @@
 package rescuecore2.messages.components;
 
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.writeInt32;
-import static rescuecore2.misc.EncodingTools.readFloat32;
-import static rescuecore2.misc.EncodingTools.writeFloat32;
-
 import rescuecore2.messages.AbstractMessageComponent;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+
+import static rescuecore2.misc.EncodingTools.readFloat32;
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.writeFloat32;
+import static rescuecore2.misc.EncodingTools.writeInt32;
 
 /**
  * A message component that is a list of floats.
@@ -87,6 +86,14 @@ public class FloatListComponent extends AbstractMessageComponent {
 		}
 	}
 
+    @Override
+    public void write(DataOutput out) throws IOException {
+        writeInt32(data.size(), out);
+        for (Float next : data) {
+            writeFloat32(next.floatValue(), out);
+        }
+    }
+
 	@Override
 	public void read(InputStream in) throws IOException {
 		data.clear();
@@ -100,6 +107,12 @@ public class FloatListComponent extends AbstractMessageComponent {
 	public String toString() {
 		return getName() + " = " + data.toString();
 	}
+
+    @Override
+    public int getBytesLength() {
+        return 4 * (data.size()+1);
+    }
+
 //
 //	public static void main(String[] args) throws IOException {
 //		System.out.println("Test starts...");

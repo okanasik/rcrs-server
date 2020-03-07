@@ -1,17 +1,18 @@
 package rescuecore2.messages.components;
 
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.writeInt32;
-import static rescuecore2.misc.EncodingTools.readString;
-import static rescuecore2.misc.EncodingTools.writeString;
-
-import rescuecore2.messages.AbstractMessageComponent;
 import rescuecore2.config.Config;
+import rescuecore2.messages.AbstractMessageComponent;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 import java.util.Set;
+
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.readString;
+import static rescuecore2.misc.EncodingTools.writeInt32;
+import static rescuecore2.misc.EncodingTools.writeString;
 
 /**
    A Config component to a message.
@@ -65,6 +66,16 @@ public class ConfigComponent extends AbstractMessageComponent {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        Set<String> keys = config.getAllKeys();
+        writeInt32(keys.size(), out);
+        for (String key : keys) {
+            writeString(key, out);
+            writeString(config.getValue(key), out);
+        }
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         int count = readInt32(in);
         config = new Config();
@@ -78,5 +89,17 @@ public class ConfigComponent extends AbstractMessageComponent {
     @Override
     public String toString() {
         return getName() + " (" + config.getAllKeys().size() + " entries)";
+    }
+
+    @Override
+    public int getBytesLength() {
+        int total = 4; // the count of the keys
+        for (String key : config.getAllKeys()) {
+            total += 4; // the length of the key string
+            total += key.length(); // bytes of the string
+            total += 4; // the length of the value string
+            total += config.getValue(key).length();
+        }
+        return total;
     }
 }

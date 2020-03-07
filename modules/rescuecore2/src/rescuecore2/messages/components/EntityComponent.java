@@ -1,14 +1,15 @@
 package rescuecore2.messages.components;
 
-import static rescuecore2.misc.EncodingTools.readEntity;
-import static rescuecore2.misc.EncodingTools.writeEntity;
-
 import rescuecore2.messages.AbstractMessageComponent;
 import rescuecore2.worldmodel.Entity;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+
+import static rescuecore2.misc.EncodingTools.readEntity;
+import static rescuecore2.misc.EncodingTools.writeEntity;
 
 /**
    An Entity component to a message.
@@ -57,6 +58,11 @@ public class EntityComponent extends AbstractMessageComponent {
     }
 
     @Override
+    public void write(DataOutput out) throws IOException {
+        writeEntity(entity, out);
+    }
+
+    @Override
     public void read(InputStream in) throws IOException {
         entity = readEntity(in);
     }
@@ -64,5 +70,18 @@ public class EntityComponent extends AbstractMessageComponent {
     @Override
     public String toString() {
         return getName() + " = " + entity.toString();
+    }
+
+    @Override
+    public int getBytesLength() {
+        int total = 0;
+        if (entity != null) {
+            total += 4; // urn string length
+            total += entity.getURN().length(); // string urn
+            total += 4; // entity id integer
+            total += 4; // entity content byte length
+            total += entity.getBytesLength();
+        }
+        return total;
     }
 }

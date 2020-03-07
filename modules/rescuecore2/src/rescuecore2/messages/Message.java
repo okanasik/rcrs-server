@@ -1,5 +1,6 @@
 package rescuecore2.messages;
 
+import java.io.DataOutput;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
@@ -21,10 +22,14 @@ public interface Message {
      */
     void write(OutputStream out) throws IOException;
 
+    void write(DataOutput out) throws IOException;
+
     /**
        Read the content of this message from a stream. The content should not include the message type ID.
        @param in The stream to read from.
        @throws IOException If the read fails.
      */
     void read(InputStream in) throws IOException;
+
+    int getBytesLength();
 }
