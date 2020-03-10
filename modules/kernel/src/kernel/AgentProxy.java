@@ -21,6 +21,7 @@ import java.util.Map;
 public class AgentProxy extends AbstractKernelComponent {
     private Entity entity;
     private Map<Integer, Collection<Command>> commands;
+    private int lastTime;
 
     /**
        Construct an agent.
@@ -37,6 +38,7 @@ public class AgentProxy extends AbstractKernelComponent {
                 return new ArrayList<Command>();
             }
         };
+        lastTime = -1;
         c.addConnectionListener(new AgentConnectionListener());
     }
 
@@ -59,14 +61,20 @@ public class AgentProxy extends AbstractKernelComponent {
        @return A collection of messages representing the commands
      */
     public Collection<Command> getAgentCommands(int timestep) {
+        Collection<Command> result = null;
         synchronized (commands) {
-            Collection<Command> result = commands.get(timestep);
+            result = commands.get(timestep);
             synchronized (result) {
                 Logger.trace(entity.toString() + " getAgentCommands(" + timestep + ") returning " + result);
                 result.notifyAll();
             }
-            return result;
+            // remove commands from previous timestep
+            if (lastTime >= 0 && lastTime != timestep) {
+                commands.remove(lastTime);
+            }
+            lastTime = timestep;
         }
+        return result;
     }
 
     /**
