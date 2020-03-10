@@ -102,19 +102,21 @@ public class Kernel {
             viewers = new HashSet<ViewerProxy>();
             time = 0;
             try {
-                String logName = config.getValue("kernel.logname");
-                Logger.info("Logging to " + logName);
-                File logFile = new File(logName);
-                if (logFile.getParentFile().mkdirs()) {
-                    Logger.info("Created log directory: " + logFile.getParentFile().getAbsolutePath());
+                if (!config.getBooleanValue("nolog")) {
+                    String logName = config.getValue("kernel.logname");
+                    Logger.info("Logging to " + logName);
+                    File logFile = new File(logName);
+                    if (logFile.getParentFile().mkdirs()) {
+                        Logger.info("Created log directory: " + logFile.getParentFile().getAbsolutePath());
+                    }
+                    if (logFile.createNewFile()) {
+                        Logger.info("Created log file: " + logFile.getAbsolutePath());
+                    }
+                    log = new FileLogWriter(logFile);
+                    log.writeRecord(new StartLogRecord());
+                    log.writeRecord(new InitialConditionsRecord(worldModel));
+                    log.writeRecord(new ConfigRecord(config));
                 }
-                if (logFile.createNewFile()) {
-                    Logger.info("Created log file: " + logFile.getAbsolutePath());
-                }
-                log = new FileLogWriter(logFile);
-                log.writeRecord(new StartLogRecord());
-                log.writeRecord(new InitialConditionsRecord(worldModel));
-                log.writeRecord(new ConfigRecord(config));
             }
             catch (IOException e) {
                 throw new KernelException("Couldn't open log file for writing", e);
@@ -342,13 +344,17 @@ public class Kernel {
                 Logger.debug("Waiting for commands");
                 Collection<Command> commands = waitForCommands(time);
                 nextTimestep.setCommands(commands);
-                log.writeRecord(new CommandsRecord(time, commands));
+                if (!config.getBooleanValue("nolog")) {
+                    log.writeRecord(new CommandsRecord(time, commands));
+                }
                 long commandsTime = System.currentTimeMillis();
                 Logger.debug("Broadcasting commands");
                 ChangeSet changes = sendCommandsToSimulators(time, commands);
                 //                simulatorUpdates.show(changes);
                 nextTimestep.setChangeSet(changes);
-                log.writeRecord(new UpdatesRecord(time, changes));
+                if (!config.getBooleanValue("nolog")) {
+                    log.writeRecord(new UpdatesRecord(time, changes));
+                }
                 long updatesTime = System.currentTimeMillis();
                 // Merge updates into world model
                 worldModel.merge(changes);
@@ -430,8 +436,10 @@ public class Kernel {
 //                Logger.warn("Interrupted during shutdown");
 //            }
             try {
-                log.writeRecord(new EndLogRecord());
-                log.close();
+                if (!config.getBooleanValue("nolog")) {
+                    log.writeRecord(new EndLogRecord());
+                    log.close();
+                }
             }
             catch (LogException e) {
                 Logger.error("Error closing log", e);
@@ -453,7 +461,9 @@ public class Kernel {
             Collection<Command> heard = communicationModel.getHearing(next.getControlledEntity());
             EntityID id = next.getControlledEntity().getID();
             timestep.registerPerception(id, visible, heard);
-            log.writeRecord(new PerceptionRecord(time, id, visible, heard));
+            if (!config.getBooleanValue("nolog")) {
+                log.writeRecord(new PerceptionRecord(time, id, visible, heard));
+            }
             next.sendPerceptionUpdate(time, visible, heard);
         }
     }

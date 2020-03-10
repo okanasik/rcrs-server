@@ -7,7 +7,7 @@ processArgs $*
 # Delete old logs
 rm -f $LOGDIR/*.log
 
-startKernel --autorun --nomenu --nogui
+startKernel --autorun --nomenu --nogui --nolog
 #startSims --nogui --viewer.team-name=Sample --viewer.maximise=true
 
 #makeClasspath $BASEDIR/lib

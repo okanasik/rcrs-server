@@ -47,7 +47,7 @@ public class ComponentManager implements ConnectionManagerListener,
 	private static final int STARTING_ID = 1;
 
 	// wait less 10000
-	private static final int WAIT_TIME = 10;
+	private static final int WAIT_TIME = 100;
 
 	private Kernel kernel;
 	private ComponentManagerGUI gui;
@@ -150,6 +150,8 @@ public class ComponentManager implements ConnectionManagerListener,
 						done = false;
 						Logger.info("Waiting for " + next.getValue().size()
 								+ " entities of type " + next.getKey());
+						System.err.println("Waiting for " + next.getValue().size()
+                                + " entities of type " + next.getKey());
 					}
 				}
 				if (!agentsToAcknowledge.isEmpty()) {

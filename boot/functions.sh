@@ -169,10 +169,10 @@ function startKernel {
 	else
 		echo "Running team $TEAM."
 	fi
-    KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log --kernel.team=$TEAM $*"
+    KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log --kernel.team=$TEAM --kernel.inline-only=true $*"
     makeClasspath $BASEDIR/jars $BASEDIR/lib $BASEDIR/teamjars
 
-	java -Xmx2048m -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS
+	java -Xmx24g -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS
     #execute kernel "java -Xmx2048m -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS"
     # Wait for the kernel to start
     #waitFor $LOGDIR/kernel.log "Listening for connections"
