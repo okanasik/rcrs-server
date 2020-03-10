@@ -45,9 +45,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static rescuecore2.misc.java.JavaTools.instantiate;
 import static rescuecore2.misc.java.JavaTools.instantiateFactory;
@@ -59,6 +61,7 @@ public final class StartKernel {
 	private static final String NO_STARTUP_MENU = "--nomenu";
 	private static final String NO_GUI = "--nogui";
 	private static final String AUTORUN = "--autorun";
+	private static final String NOLOG = "--nolog";
 
 	private static final String GIS_MANIFEST_KEY = "Gis";
 	private static final String PERCEPTION_MANIFEST_KEY = "Perception";
@@ -112,7 +115,10 @@ public final class StartKernel {
 					showStartupMenu = false;
 				} else if (arg.equalsIgnoreCase(AUTORUN)) {
 					autorun = true;
-				} else {
+				} else if (arg.equalsIgnoreCase(NOLOG)) {
+				    config.setBooleanValue("nolog", true);
+                }
+				else {
 					Logger.warn("Unrecognised option: " + arg);
 				}
 			}
@@ -313,89 +319,40 @@ public final class StartKernel {
 		}
 	}
 
-	private static void waitForComponentManager(final KernelInfo kernel,
-			Config config) throws KernelException {
-		// Wait for all connections
-		// Set up a CountDownLatch
-		final CountDownLatch latch = new CountDownLatch(1);
-		final long timeout = config.getIntValue(KERNEL_STARTUP_TIME_KEY, -1);
-		Thread timeoutThread = null;
-		if (timeout > 0) {
-			timeoutThread = new Thread() {
-				public void run() {
-					try {
-						Thread.sleep(timeout);
-						latch.countDown();
-					}
-					// CHECKSTYLE:OFF:EmptyBlock
-					catch (InterruptedException e) {
-						// Ignore
-					}
-					// CHECKSTYLE:ON:EmptyBlock
-				}
-			};
-		}
-		Thread waitThread = new Thread() {
-			public void run() {
-				try {
-					kernel.componentManager.waitForAllAgents();
-					kernel.componentManager.waitForAllSimulators();
-					kernel.componentManager.waitForAllViewers();
-				}
-				// CHECKSTYLE:OFF:EmptyBlock
-				catch (InterruptedException e) {
-					// Ignore
-				}
-				// CHECKSTYLE:ON:EmptyBlock
-				latch.countDown();
-			}
-		};
-		waitThread.start();
-		if (timeoutThread != null) {
-			timeoutThread.start();
-		}
-		// Wait at the latch until either everything is connected or the
-		// connection timeout expires
-		Logger.info("Waiting for all agents, simulators and viewers to connect.");
-		if (timeout > -1) {
-			Logger.info("Connection timeout is " + timeout + "ms");
-		}
-		try {
-			latch.await();
-		} catch (InterruptedException e) {
-			throw new KernelException("Interrupted");
-		} finally {
-            waitThread.interrupt();
-            if (timeoutThread != null) {
-                timeoutThread.interrupt();
-            }
+	private static void waitForComponentManager(final KernelInfo kernel, Config config) throws KernelException {
+	    //do not use timeout wait for all components to connect
+        try {
+            kernel.componentManager.waitForAllAgents();
+            kernel.componentManager.waitForAllSimulators();
+            kernel.componentManager.waitForAllViewers();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
         }
 	}
 
 	private static void autostartComponents(KernelInfo info, Registry registry,
 			KernelGUI gui, Config config) throws InterruptedException {
 		KernelStartupOptions options = info.options;
-//		Collection<Callable<Void>> all = new ArrayList<Callable<Void>>();
+		Collection<Callable<Void>> all = new ArrayList<Callable<Void>>();
 		Config launchConfig = new Config(config);
 		// keeps only random seed
 		launchConfig.removeExcept(Constants.RANDOM_SEED_KEY,
 				Constants.RANDOM_CLASS_KEY, "kernel.team");
 		for (Pair<String, Integer> next : options.getInlineComponents()) {
 			if (next.second() > 0) {
-//				all.add(new ComponentStarter(next.first(),
-//						info.componentManager, next.second(), registry, gui,
-//						launchConfig));
+				all.add(new ComponentStarter(next.first(),
+						info.componentManager, next.second(), registry, gui,
+						launchConfig));
                 ComponentStarter cs = new ComponentStarter(next.first(),
                         info.componentManager, next.second(), registry, gui,
                         launchConfig);
-                cs.call();
 			}
 		}
-//		ExecutorService service = Executors.newFixedThreadPool(Runtime
-//				.getRuntime().availableProcessors());
-//		service.invokeAll(all);
-//		// shutdown the pool when all threads exits
-//		service.shutdown();
+		ExecutorService service = Executors.newFixedThreadPool(Runtime
+				.getRuntime().availableProcessors());
+		service.invokeAll(all);
+		// shutdown the pool when all threads exits
+		service.shutdown();
 	}
 
 	private static void registerInitialAgents(Config config,
