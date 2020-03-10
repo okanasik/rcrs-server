@@ -1,33 +1,27 @@
 package sample;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.EnumSet;
-
-import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.ChangeSet;
+import org.apache.log4j.Logger;
 import rescuecore2.messages.Command;
-import rescuecore2.registry.Registry;
 import rescuecore2.registry.FilterEntityFactory;
 import rescuecore2.registry.FilterPropertyFactory;
+import rescuecore2.registry.Registry;
 import rescuecore2.standard.entities.Area;
-import rescuecore2.standard.entities.Human;
-import rescuecore2.standard.entities.Road;
-import rescuecore2.standard.entities.StandardEntity;
-import rescuecore2.standard.entities.StandardEntityURN;
-import rescuecore2.standard.entities.StandardPropertyURN;
-import rescuecore2.standard.entities.StandardEntityFactory;
-import rescuecore2.standard.entities.StandardPropertyFactory;
 import rescuecore2.standard.entities.Civilian;
+import rescuecore2.standard.entities.Road;
+import rescuecore2.standard.entities.StandardEntityFactory;
+import rescuecore2.standard.entities.StandardEntityURN;
+import rescuecore2.standard.entities.StandardPropertyFactory;
+import rescuecore2.standard.entities.StandardPropertyURN;
+import rescuecore2.worldmodel.ChangeSet;
+import rescuecore2.worldmodel.EntityID;
 
-import org.apache.log4j.Logger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
    A sample civilian agent.
@@ -143,7 +137,7 @@ public class SampleCivilian extends AbstractSampleAgent<Civilian> {
     	int maxPathLength=20;
         List<EntityID> result = new ArrayList<EntityID>(maxPathLength);
         Set<EntityID> seen = new HashSet<EntityID>();
-        EntityID current = ((Human)me()).getPosition();
+        EntityID current = me().getPosition();
         
         for (int i = 0; i < maxPathLength; ++i) {
             result.add(current);
@@ -152,7 +146,10 @@ public class SampleCivilian extends AbstractSampleAgent<Civilian> {
             if(area instanceof Road)
               break;
             if(area==null) {
-              System.err.println(current+" is null??? "+me());
+                // since we keep only the sample civilian entity in the model
+                // the position of the civilian will be always null
+                // result will have only the current position
+                // nothing is wrong, the civilian will stay at the current position
               break;
             }
             List<EntityID> possible = new ArrayList<EntityID>(area.getNeighbours());
