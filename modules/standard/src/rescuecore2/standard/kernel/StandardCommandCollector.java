@@ -26,7 +26,7 @@ import java.util.ArrayList;
 */
 public class StandardCommandCollector implements CommandCollector {
     // wait as small as possible
-    private static final long WAIT_TIME = 1;
+    private static final long WAIT_TIME = 100;
 
     @Override
     public void initialise(Config config) {
@@ -49,7 +49,10 @@ public class StandardCommandCollector implements CommandCollector {
                     commands.notifyAll();
                 }
             }
-            Logger.info(this + " waiting for commands from " + waiting.size() + " agents");
+            Logger.fatal(this + " waiting for commands from " + waiting.size() + " agents");
+            for (AgentProxy ap : waiting) {
+                Logger.fatal("agent:" + ap.getControlledEntity().getID() + " type:" + ap.getControlledEntity().getURN() + " did not sent command");
+            }
             Thread.sleep(WAIT_TIME);
         }
         Collection<Command> result = new ArrayList<Command>();
