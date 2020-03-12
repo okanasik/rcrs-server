@@ -49,9 +49,11 @@ public class StandardCommandCollector implements CommandCollector {
                     commands.notifyAll();
                 }
             }
-            Logger.fatal(this + " waiting for commands from " + waiting.size() + " agents");
-            for (AgentProxy ap : waiting) {
-                Logger.fatal("agent:" + ap.getControlledEntity().getID() + " type:" + ap.getControlledEntity().getURN() + " did not sent command");
+            if (waiting.size() > 0) {
+                Logger.fatal(this + " waiting for commands from " + waiting.size() + " agents");
+                for (AgentProxy ap : waiting) {
+                    Logger.fatal("agent:" + ap.getControlledEntity().getID() + " type:" + ap.getControlledEntity().getURN() + " did not sent command");
+                }
             }
             Thread.sleep(WAIT_TIME);
         }
