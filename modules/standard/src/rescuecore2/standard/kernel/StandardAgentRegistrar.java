@@ -1,36 +1,32 @@
 package rescuecore2.standard.kernel;
 
-import java.util.Set;
-import java.util.HashSet;
-
-import java.util.regex.PatternSyntaxException;
-
 import kernel.AgentRegistrar;
 import kernel.ComponentManager;
 import kernel.KernelException;
-
-import rescuecore2.config.Config;
-import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.worldmodel.Entity;
-import rescuecore2.worldmodel.Property;
 import rescuecore2.Constants;
-
-import rescuecore2.standard.entities.FireBrigade;
-import rescuecore2.standard.entities.FireStation;
-import rescuecore2.standard.entities.AmbulanceTeam;
+import rescuecore2.config.Config;
+import rescuecore2.standard.StandardConstants;
 import rescuecore2.standard.entities.AmbulanceCentre;
-import rescuecore2.standard.entities.PoliceForce;
-import rescuecore2.standard.entities.PoliceOffice;
-import rescuecore2.standard.entities.Civilian;
-import rescuecore2.standard.entities.Human;
-import rescuecore2.standard.entities.Road;
+import rescuecore2.standard.entities.AmbulanceTeam;
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.Building;
-import rescuecore2.standard.entities.StandardPropertyURN;
+import rescuecore2.standard.entities.Civilian;
+import rescuecore2.standard.entities.FireBrigade;
+import rescuecore2.standard.entities.FireStation;
+import rescuecore2.standard.entities.Human;
+import rescuecore2.standard.entities.PoliceForce;
+import rescuecore2.standard.entities.PoliceOffice;
+import rescuecore2.standard.entities.Road;
 import rescuecore2.standard.entities.StandardEntityURN;
+import rescuecore2.standard.entities.StandardPropertyURN;
 import rescuecore2.standard.entities.StandardWorldModel;
+import rescuecore2.worldmodel.Entity;
+import rescuecore2.worldmodel.Property;
+import rescuecore2.worldmodel.WorldModel;
 
-import rescuecore2.standard.StandardConstants;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.PatternSyntaxException;
 
 /**
    Class that registers standard agents.
@@ -69,6 +65,9 @@ public class StandardAgentRegistrar implements AgentRegistrar {
         VISIBLE_CONFIG_OPTIONS.add("perception\\.los\\.max-distance");
         VISIBLE_CONFIG_OPTIONS.add("perception\\.los\\.precision\\.hp");
         VISIBLE_CONFIG_OPTIONS.add("perception\\.los\\.precision\\.damage");
+        VISIBLE_CONFIG_OPTIONS.add("gis\\.map\\.dir");
+        VISIBLE_CONFIG_OPTIONS.add("kernel\\.team");
+        VISIBLE_CONFIG_OPTIONS.add("kernel\\.timesteps");
     }
 
     @Override
