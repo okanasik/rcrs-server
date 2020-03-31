@@ -1,16 +1,11 @@
 package rescuecore2.standard.view;
 
-import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.Color;
-import java.awt.Stroke;
-import java.awt.BasicStroke;
-
-import rescuecore2.worldmodel.EntityID;
 import rescuecore2.misc.gui.ScreenTransform;
-
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.Edge;
+import rescuecore2.worldmodel.EntityID;
+
+import java.awt.*;
 
 /**
    A view layer that renders area neighbours.
