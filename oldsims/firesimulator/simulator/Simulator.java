@@ -1,16 +1,17 @@
 package firesimulator.simulator;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
 import firesimulator.util.Configuration;
 import firesimulator.util.Rnd;
 import firesimulator.world.Building;
 import firesimulator.world.FireBrigade;
 import firesimulator.world.World;
 import org.apache.log4j.Logger;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 public class Simulator {
 
@@ -50,7 +51,7 @@ public class Simulator {
 
   private static Simulator me;
 
-  private EnergyHistory    energyHistory;
+//  private EnergyHistory    energyHistory;
 
 
   public Simulator( World world ) {
