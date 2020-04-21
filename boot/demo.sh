@@ -17,3 +17,6 @@ startKernel --autorun --nomenu --nogui --nolog
 #waitFor $LOGDIR/kernel.log "Kernel has shut down" 30
 
 #kill $PIDS
+
+# usage
+# ./demo.sh -c ../../scenarios/robocup2019/test/config -m ../../scenarios/robocup2019/test/map -t ait
