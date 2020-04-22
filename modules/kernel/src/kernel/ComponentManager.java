@@ -382,7 +382,11 @@ public class ComponentManager implements ConnectionManagerListener,
 					reply = new KAConnectError(requestID, "No more agents");
                     try {
                         connection.sendMessage(reply);
+                        // wait for the failure message to arrive to the agent
+                        Thread.sleep(100);
                     } catch (ConnectionException e) {
+                        Logger.error("Error sending reply", e);
+                    } catch (InterruptedException e) {
                         Logger.error("Error sending reply", e);
                     } finally {
                         connection.shutdown();

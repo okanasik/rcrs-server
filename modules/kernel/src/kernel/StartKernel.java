@@ -341,17 +341,16 @@ public final class StartKernel {
 				Constants.RANDOM_CLASS_KEY, "kernel.team");
 		for (Pair<String, Integer> next : options.getInlineComponents()) {
 			if (next.second() > 0) {
-				all.add(new ComponentStarter(next.first(),
-						info.componentManager, next.second(), registry, gui,
-						launchConfig));
                 ComponentStarter cs = new ComponentStarter(next.first(),
                         info.componentManager, next.second(), registry, gui,
                         launchConfig);
+				all.add(cs);
 			}
 		}
 		ExecutorService service = Executors.newFixedThreadPool(Runtime
 				.getRuntime().availableProcessors());
 		service.invokeAll(all);
+
 		// shutdown the pool when all threads exits
 		service.shutdown();
 	}
