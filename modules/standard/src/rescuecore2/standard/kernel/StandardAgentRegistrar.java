@@ -68,6 +68,7 @@ public class StandardAgentRegistrar implements AgentRegistrar {
         VISIBLE_CONFIG_OPTIONS.add("gis\\.map\\.dir");
         VISIBLE_CONFIG_OPTIONS.add("kernel\\.team");
         VISIBLE_CONFIG_OPTIONS.add("kernel\\.timesteps");
+        VISIBLE_CONFIG_OPTIONS.add("dataset");
     }
 
     @Override

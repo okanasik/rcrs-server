@@ -73,6 +73,7 @@ function processArgs {
     TIMESTAMP_LOGS=""
     NOGUI="no"
     XTERM="no"
+    DATASET="true"
 
     if [ $# -gt 0 ] && [[ $1 != -* ]]; then
         MAP="$1/map"
@@ -96,6 +97,10 @@ function processArgs {
                 ;;
             -t | --team)
                 TEAM="$2"
+                shift 2
+                ;;
+            -d | --dataset)
+                DATASET="$2"
                 shift 2
                 ;;
             -s | --timestamp)
@@ -175,7 +180,7 @@ function startKernel {
 	else
 		echo "Running team $TEAM."
 	fi
-    KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log --kernel.team=$TEAM --kernel.inline-only=true $*"
+    KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log --kernel.team=$TEAM --kernel.inline-only=true --dataset=$DATASET $*"
     makeClasspath $BASEDIR/jars $BASEDIR/lib $BASEDIR/teamjars
 
 	java -Xmx24g -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS
