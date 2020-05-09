@@ -63,17 +63,14 @@ public class AgentProxy extends AbstractKernelComponent {
     public Collection<Command> getAgentCommands(int timestep) {
         Collection<Command> result = null;
         synchronized (commands) {
-            result = commands.get(timestep);
-            synchronized (result) {
-                Logger.trace(entity.toString() + " getAgentCommands(" + timestep + ") returning " + result);
-                result.notifyAll();
-            }
+            result = new ArrayList<>(commands.get(timestep));
             // remove commands from previous timestep
             if (lastTime >= 0 && lastTime != timestep) {
                 commands.remove(lastTime);
             }
             lastTime = timestep;
         }
+        Logger.trace(entity.toString() + " getAgentCommands(" + timestep + ") returning " + result);
         return result;
     }
 
@@ -102,10 +99,7 @@ public class AgentProxy extends AbstractKernelComponent {
         Logger.trace("AgentProxy " + entity + " received " + c);
         synchronized (commands) {
             Collection<Command> result = commands.get(time);
-            synchronized (result) {
-                result.add(c);
-                result.notifyAll();
-            }
+            result.add(c);
             commands.notifyAll();
         }
     }
