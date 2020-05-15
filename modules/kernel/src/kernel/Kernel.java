@@ -372,6 +372,7 @@ public class Kernel {
                 long broadcastTime = System.currentTimeMillis();
                 Logger.debug("Computing score");
                 double s = score.score(worldModel, nextTimestep);
+                Logger.fatal("time:" + time + " score:" + s);
                 long scoreTime = System.currentTimeMillis();
                 nextTimestep.setScore(s);
                 Logger.info("Timestep " + time + " complete");
