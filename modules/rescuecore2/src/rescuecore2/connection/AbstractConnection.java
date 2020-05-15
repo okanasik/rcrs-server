@@ -1,24 +1,23 @@
 package rescuecore2.connection;
 
-import static rescuecore2.misc.EncodingTools.writeInt32;
-import static rescuecore2.misc.EncodingTools.readMessage;
-import static rescuecore2.misc.EncodingTools.writeMessage;
-
+import rescuecore2.log.Logger;
 import rescuecore2.messages.Message;
 import rescuecore2.misc.WorkerThread;
 import rescuecore2.registry.Registry;
-import rescuecore2.log.Logger;
 
-import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.IOException;
+import static rescuecore2.misc.EncodingTools.readMessage;
+import static rescuecore2.misc.EncodingTools.writeInt32;
+import static rescuecore2.misc.EncodingTools.writeMessage;
 
 /**
    Abstract base class for Connection implementations.
@@ -80,6 +79,7 @@ public abstract class AbstractConnection implements Connection {
             if (state == State.STARTED) {
                 try {
                     broadcast.kill();
+                    Logger.fatal("Killed mb thread:" + broadcast.getName());
                 }
                 catch (InterruptedException e) {
                     Logger.error("AbstractConnection interrupted while shutting down broadcast thread", e);

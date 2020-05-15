@@ -13,9 +13,8 @@ import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.WorldModel;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Random;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
    Abstract base class for component implementations.
@@ -132,6 +131,7 @@ public abstract class AbstractComponent<T extends WorldModel<? extends Entity>> 
     public void shutdown() {
         try {
             processor.kill();
+            Logger.fatal("Killed mp thread:" + processor.getName());
             connection.shutdown();
         }
         catch (InterruptedException e) {
@@ -173,14 +173,17 @@ public abstract class AbstractComponent<T extends WorldModel<? extends Entity>> 
     }
 
     private class MessageProcessor extends WorkerThread {
-        private BlockingQueue<Message> queue;
+        private LinkedList<Message> queue;
 
         MessageProcessor() {
-            queue = new LinkedBlockingQueue<Message>();
+            queue = new LinkedList<Message>();
         }
 
         void push(Message m) {
-            queue.add(m);
+            synchronized (queue) {
+                queue.add(m);
+                queue.notifyAll();
+            }
         }
 
         @Override
@@ -190,10 +193,20 @@ public abstract class AbstractComponent<T extends WorldModel<? extends Entity>> 
                 Logger.pushNDC(ndc);
             }
             try {
-                Logger.trace("MessageProcessor working: " + queue.size() + " messages in the queue");
-                Message msg = queue.take();
-                Logger.trace("Next message: " + msg);
-                AbstractComponent.this.processMessage(msg);
+                Message msg = null;
+                synchronized (queue) {
+                    if (queue.isEmpty()) {
+                        queue.wait(TIMEOUT);
+                        return true;
+                    } else {
+                        Logger.trace("MessageProcessor working: " + queue.size() + " messages in the queue");
+                        msg = queue.poll();
+                    }
+                }
+                if (msg != null) {
+                    Logger.trace("Next message: " + msg);
+                    AbstractComponent.this.processMessage(msg);
+                }
                 return true;
             }
             finally {

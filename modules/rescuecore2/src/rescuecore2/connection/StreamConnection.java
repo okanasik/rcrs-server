@@ -1,23 +1,23 @@
 package rescuecore2.connection;
 
-import static rescuecore2.misc.EncodingTools.writeInt32;
-import static rescuecore2.misc.EncodingTools.readInt32;
-import static rescuecore2.misc.EncodingTools.readBytes;
+import rescuecore2.log.Logger;
+import rescuecore2.misc.Pair;
+import rescuecore2.misc.WorkerThread;
+import rescuecore2.registry.Registry;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
-import rescuecore2.misc.WorkerThread;
-import rescuecore2.misc.Pair;
-import rescuecore2.registry.Registry;
-import rescuecore2.log.Logger;
+import static rescuecore2.misc.EncodingTools.readBytes;
+import static rescuecore2.misc.EncodingTools.readInt32;
+import static rescuecore2.misc.EncodingTools.writeInt32;
 
 /**
    Connection implementation that uses InputStreams and OutputStreams.
@@ -68,6 +68,7 @@ public class StreamConnection extends AbstractConnection {
         }
         try {
             writeThread.kill();
+            Logger.fatal("Killed wt thread:" + writeThread.getName());
         }
         catch (InterruptedException e) {
             Logger.error("StreamConnection interrupted while shutting down write thread", e);
