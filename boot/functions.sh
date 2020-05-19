@@ -38,7 +38,7 @@ function waitFor {
 # Make a classpath argument by looking in a directory of jar files.
 # Positional parameters are the directories to look in
 function makeClasspath {
-    RESULT="../supplement"
+    RESULT=""
     while [[ ! -z "$1" ]]; do
         for NEXT in $1/*.jar; do
             RESULT="$RESULT:$NEXT"
@@ -183,7 +183,7 @@ function startKernel {
     KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log --kernel.team=$TEAM --kernel.inline-only=true --dataset=$DATASET $*"
     makeClasspath $BASEDIR/jars $BASEDIR/lib $BASEDIR/teamjars
 
-	java -Xmx24g -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS
+	java -Xmx24g -Dlog4j.configuration=file://$BASEDIR/supplement/mylog4j.properties -Dlog4j.log.dir=$LOGDIR -cp $CP  kernel.StartKernel $KERNEL_OPTIONS
     #execute kernel "java -Xmx2048m -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS"
     # Wait for the kernel to start
     #waitFor $LOGDIR/kernel.log "Listening for connections"
