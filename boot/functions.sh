@@ -74,6 +74,7 @@ function processArgs {
     NOGUI="no"
     XTERM="no"
     DATASET="true"
+    VIEWER="null"
 
     if [ $# -gt 0 ] && [[ $1 != -* ]]; then
         MAP="$1/map"
@@ -118,6 +119,10 @@ function processArgs {
             +x)
                 XTERM="yes"
                 shift
+                ;;
+            -v | --viewer)
+				VIEWER="sample.SampleViewer"
+				shift
                 ;;
             -h | --help)
                 printUsage
@@ -180,7 +185,7 @@ function startKernel {
 	else
 		echo "Running team $TEAM."
 	fi
-    KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log --kernel.team=$TEAM --kernel.inline-only=true --dataset=$DATASET $*"
+    KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log --kernel.team=$TEAM --kernel.inline-only=true --kernel.viewers.auto=$VIEWER --dataset=$DATASET $*"
     makeClasspath $BASEDIR/jars $BASEDIR/lib $BASEDIR/teamjars
 
 	java -Xmx24g -Dlog4j.configuration=file://$BASEDIR/supplement/mylog4j.properties -Dlog4j.log.dir=$LOGDIR -cp $CP  kernel.StartKernel $KERNEL_OPTIONS

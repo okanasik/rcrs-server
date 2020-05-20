@@ -19,4 +19,4 @@ startKernel --autorun --nomenu --nogui --nolog
 #kill $PIDS
 
 # usage
-# ./demo.sh -c ../../scenarios/robocup2019/test/config -m ../../scenarios/robocup2019/test/map -t ait -d true
+# ./demo.sh -c ../../scenarios/robocup2019/test/config -m ../../scenarios/robocup2019/test/map -t ait -d true -v
