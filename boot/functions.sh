@@ -180,7 +180,8 @@ function execute {
 function startKernel {
 	if [ -z $TEAM ]
 	then
-		echo "TEAM is empty. Please run with -t <teamname>";
+		# usage
+		echo "./demo.sh -c ../../scenarios/robocup2019/test/config -m ../../scenarios/robocup2019/test/map -t ait -d true -v"
 		return;
 	else
 		echo "Running team $TEAM."

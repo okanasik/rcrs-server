@@ -210,15 +210,18 @@ public final class StartKernel {
 			}
 			initialiseKernel(kernelInfo, config, localRegistry);
 			autostartComponents(kernelInfo, localRegistry, gui, config);
+			double lastScore = 0;
 			if (!showGUI || autorun) {
 				waitForComponentManager(kernelInfo, config);
 				Kernel kernel = kernelInfo.kernel;
 				while (!kernel.hasTerminated()) {
                     Logger.error("Timestep: " + kernel.getTime() + " started.");
-					kernel.timestep();
+					lastScore = kernel.timestep();
                     Logger.error("Timestep: " + kernel.getTime() + " ended.");
 				}
 				kernel.shutdown();
+				Logger.fatal("finalscore:" + lastScore);
+				Logger.fatal("kernelshutdown");
 			}
 		} catch (ConfigException e) {
 			Logger.fatal("Couldn't start kernel", e);

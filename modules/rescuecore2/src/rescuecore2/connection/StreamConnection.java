@@ -68,7 +68,7 @@ public class StreamConnection extends AbstractConnection {
         }
         try {
             writeThread.kill();
-            Logger.fatal("Killed wt thread:" + writeThread.getName());
+//            Logger.fatal("Killed wt thread:" + writeThread.getName());
         }
         catch (InterruptedException e) {
             Logger.error("StreamConnection interrupted while shutting down write thread", e);

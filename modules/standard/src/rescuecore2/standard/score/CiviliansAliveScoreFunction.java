@@ -1,12 +1,11 @@
 package rescuecore2.standard.score;
 
-import rescuecore2.score.AbstractScoreFunction;
-import rescuecore2.config.Config;
-import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.worldmodel.Entity;
 import rescuecore2.Timestep;
-
+import rescuecore2.config.Config;
+import rescuecore2.score.AbstractScoreFunction;
 import rescuecore2.standard.entities.Civilian;
+import rescuecore2.worldmodel.Entity;
+import rescuecore2.worldmodel.WorldModel;
 
 /**
    Score function that measures the number of living civilians. One point per civilian still alive.
@@ -25,7 +24,7 @@ public class CiviliansAliveScoreFunction extends AbstractScoreFunction {
 
     @Override
     public double score(WorldModel<? extends Entity> world, Timestep timestep) {
-        double sum = 0;
+        double sum = 1;
         // TODO: we can improve the performance if we iterate over civilians only
         for (Entity next : world) {
             if (next instanceof Civilian) {

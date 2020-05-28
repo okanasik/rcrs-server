@@ -79,7 +79,7 @@ public abstract class AbstractConnection implements Connection {
             if (state == State.STARTED) {
                 try {
                     broadcast.kill();
-                    Logger.fatal("Killed mb thread:" + broadcast.getName());
+//                    Logger.fatal("Killed mb thread:" + broadcast.getName());
                 }
                 catch (InterruptedException e) {
                     Logger.error("AbstractConnection interrupted while shutting down broadcast thread", e);

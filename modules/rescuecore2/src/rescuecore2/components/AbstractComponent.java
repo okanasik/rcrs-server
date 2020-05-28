@@ -131,7 +131,7 @@ public abstract class AbstractComponent<T extends WorldModel<? extends Entity>> 
     public void shutdown() {
         try {
             processor.kill();
-            Logger.fatal("Killed mp thread:" + processor.getName());
+//            Logger.fatal("Killed mp thread:" + processor.getName());
             connection.shutdown();
         }
         catch (InterruptedException e) {

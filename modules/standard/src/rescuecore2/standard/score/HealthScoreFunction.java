@@ -16,7 +16,7 @@ public class HealthScoreFunction extends AbstractScoreFunction {
     private static final double MAX = 10000;
 
     private boolean absolute;
-
+// if there is no civilian in the world
     /**
        Construct a HealthScoreFunction.
     */
@@ -48,6 +48,9 @@ public class HealthScoreFunction extends AbstractScoreFunction {
             return sum;
         }
         else {
+            // if there is no civilian in the world
+            if (max == 0 && sum == 0) return 0;
+
             return sum / max;
         }
     }

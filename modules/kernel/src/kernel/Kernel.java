@@ -326,7 +326,7 @@ public class Kernel {
        @throws KernelException If there is a problem executing the timestep.
        @throws LogException If there is a problem writing the log.
     */
-    public void timestep() throws InterruptedException, KernelException, LogException {
+    public double timestep() throws InterruptedException, KernelException, LogException {
         try {
             Logger.pushLogContext(KERNEL_LOG_CONTEXT);
             synchronized (this) {
@@ -334,7 +334,7 @@ public class Kernel {
                     fireStarted();
                 }
                 if (isShutdown) {
-                    return;
+                    return 0;
                 }
                 ++time;
                 // Work out what the agents can see and hear (using the commands from the previous timestep).
@@ -388,6 +388,7 @@ public class Kernel {
                 previousTimestep = nextTimestep;
                 Logger.debug("Commands: " + commands);
                 Logger.debug("Timestep commands: " + previousTimestep.getCommands());
+                return s;
             }
         }
         finally {
