@@ -75,6 +75,7 @@ function processArgs {
     XTERM="no"
     DATASET="true"
     VIEWER="null"
+    PROCESSID=""
 
     if [ $# -gt 0 ] && [[ $1 != -* ]]; then
         MAP="$1/map"
@@ -124,6 +125,10 @@ function processArgs {
 				VIEWER="sample.SampleViewer"
 				shift
                 ;;
+            -p | --processid)
+				PROCESSID="$2"
+				shift 2
+				;;
             -h | --help)
                 printUsage
                 exit 1
@@ -189,7 +194,7 @@ function startKernel {
     KERNEL_OPTIONS="-c $CONFIGDIR/kernel-inline.cfg --gis.map.dir=$MAP --kernel.logname=$LOGDIR/rescue.log --kernel.team=$TEAM --kernel.inline-only=true --kernel.viewers.auto=$VIEWER --dataset=$DATASET $*"
     makeClasspath $BASEDIR/jars $BASEDIR/lib $BASEDIR/teamjars
 
-	java -Xmx24g -Dlog4j.configuration=file://$BASEDIR/supplement/mylog4j.properties -Dlog4j.log.dir=$LOGDIR -cp $CP  kernel.StartKernel $KERNEL_OPTIONS
+	java -Xmx24g -Dlog4j.configuration=file://$BASEDIR/supplement/mylog4j.properties -Dlog4j.log.dir=$LOGDIR -cp $CP  kernel.StartKernel $KERNEL_OPTIONS $PROCESSID
     #execute kernel "java -Xmx2048m -cp $CP -Dlog4j.log.dir=$LOGDIR kernel.StartKernel $KERNEL_OPTIONS"
     # Wait for the kernel to start
     #waitFor $LOGDIR/kernel.log "Listening for connections"
