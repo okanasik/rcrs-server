@@ -40,6 +40,7 @@ public abstract class AbstractAgent<T extends WorldModel<? extends Entity>, E ex
     @Override
     public final void postConnect(Connection c, EntityID agentID, Collection<Entity> entities, Config kernelConfig) {
         this.entityID = agentID;
+//        System.out.println("postConnect: " + kernelConfig);
         super.postConnect(c, entities, kernelConfig);
     }
 

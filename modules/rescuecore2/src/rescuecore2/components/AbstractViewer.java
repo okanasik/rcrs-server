@@ -51,6 +51,14 @@ public abstract class AbstractViewer<T extends WorldModel<? extends Entity>> ext
         super.postConnect(c, entities, kernelConfig);
     }
 
+    // replace postConnect
+    @Override
+    public void initViewer(int id, Collection<? extends Entity> entities, Config kernelConfig) {
+        this.viewerID = id;
+        lastUpdateTime = 0;
+        initComponent(entities, kernelConfig);
+    }
+
     @Override
     public void connect(Connection connection, RequestIDGenerator generator, Config config) throws ConnectionException, ComponentConnectionException, InterruptedException {
         this.config = config;

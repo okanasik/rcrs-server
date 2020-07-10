@@ -84,6 +84,15 @@ public abstract class AbstractComponent<T extends WorldModel<? extends Entity>> 
         }
     }
 
+    // replace postConnect
+    protected final void initComponent(Collection<? extends Entity> entities, Config kernelConfig) {
+        model = createWorldModel();
+        model.addEntities(entities);
+        config.merge(kernelConfig);
+        random = config.getRandom();
+        postConnect();
+    }
+
     /**
        Perform any post-connection work required before acknowledgement of the connection is made. The default implementation does nothing.
     */
@@ -125,6 +134,11 @@ public abstract class AbstractComponent<T extends WorldModel<? extends Entity>> 
 
     @Override
     public void initialise() {
+    }
+
+    @Override
+    public void setConfig(Config config) {
+        this.config = config;
     }
 
     @Override

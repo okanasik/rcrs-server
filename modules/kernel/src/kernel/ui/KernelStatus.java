@@ -1,23 +1,17 @@
 package kernel.ui;
 
-import java.util.ArrayList;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import javax.swing.JPanel;
-import javax.swing.JList;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.BorderFactory;
-import javax.swing.SwingUtilities;
-
-import kernel.KernelListener;
 import kernel.AgentProxy;
+import kernel.Kernel;
+import kernel.KernelListener;
 import kernel.SimulatorProxy;
 import kernel.ViewerProxy;
-import kernel.Kernel;
-
-import rescuecore2.misc.gui.ListModelList;
 import rescuecore2.Timestep;
+import rescuecore2.components.Viewer;
+import rescuecore2.misc.gui.ListModelList;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
 
 /**
    A status panel for the kernel.
@@ -117,8 +111,13 @@ public class KernelStatus extends JPanel implements KernelListener {
     }
 
     @Override
-    public void viewerAdded(Kernel k, ViewerProxy info) {
+    public void viewerProxyAdded(Kernel k, ViewerProxy info) {
         viewers.add(info);
+    }
+
+    @Override
+    public void viewerAdded(Kernel k, Viewer info) {
+        System.err.println("KernelStatus.viewerAdded is called!!");
     }
 
     @Override

@@ -49,4 +49,7 @@ public interface Component {
        @throws InterruptedException If the thread is interrupted before the connection attempt completes.
     */
     void connect(Connection connection, RequestIDGenerator generator, Config config) throws ConnectionException, ComponentConnectionException, InterruptedException;
+
+    // replace connect
+    void setConfig(Config config);
 }

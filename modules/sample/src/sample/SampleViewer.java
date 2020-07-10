@@ -1,32 +1,24 @@
 package sample;
 
-import static rescuecore2.misc.java.JavaTools.instantiate;
-
-import rescuecore2.messages.control.KVTimestep;
-import rescuecore2.view.ViewComponent;
-import rescuecore2.view.ViewListener;
-import rescuecore2.view.RenderedObject;
-import rescuecore2.score.ScoreFunction;
 import rescuecore2.Constants;
 import rescuecore2.Timestep;
-
-import rescuecore2.standard.view.AnimatedWorldModelViewer;
-
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Color;
-import java.awt.Font;
-
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
-import java.util.List;
-import java.text.NumberFormat;
-
+import rescuecore2.messages.Command;
+import rescuecore2.messages.control.KVTimestep;
+import rescuecore2.score.ScoreFunction;
 import rescuecore2.standard.components.StandardViewer;
+import rescuecore2.standard.view.AnimatedWorldModelViewer;
+import rescuecore2.view.RenderedObject;
+import rescuecore2.view.ViewComponent;
+import rescuecore2.view.ViewListener;
+import rescuecore2.worldmodel.ChangeSet;
+
+import javax.swing.*;
+import java.awt.*;
+import java.text.NumberFormat;
+import java.util.Collection;
+import java.util.List;
+
+import static rescuecore2.misc.java.JavaTools.instantiate;
 
 /**
    A simple viewer.
@@ -121,6 +113,19 @@ public class SampleViewer extends StandardViewer {
                 public void objectsRollover(ViewComponent view, List<RenderedObject> objects) {
                 }
             });
+    }
+
+    @Override
+    public void setTimestep(int time, Collection<Command> commandList, ChangeSet changeSet) {
+        model.merge(changeSet);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                timeLabel.setText("Time: " + time);
+                scoreLabel.setText("Score: " + format.format(scoreFunction.score(model, new Timestep(time))));
+                viewer.view(model, commandList);
+                viewer.repaint();
+            }
+        });
     }
 
     @Override

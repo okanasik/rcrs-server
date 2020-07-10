@@ -1,6 +1,8 @@
 package rescuecore2.components;
 
 import rescuecore2.connection.Connection;
+import rescuecore2.messages.Command;
+import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.config.Config;
 
@@ -18,4 +20,10 @@ public interface Viewer extends Component {
        @param config The Config the kernel send to this agent on connection.
      */
     void postConnect(Connection c, int viewerID, Collection<Entity> entities, Config config);
+
+    // replace postConnect
+    void initViewer(int viewerID, Collection<? extends Entity> entities, Config config);
+
+    // replaces messaging of the viewer
+    void setTimestep(int time, Collection<Command> commandList, ChangeSet changeSet);
 }

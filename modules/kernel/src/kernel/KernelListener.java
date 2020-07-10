@@ -1,6 +1,7 @@
 package kernel;
 
 import rescuecore2.Timestep;
+import rescuecore2.components.Viewer;
 
 /**
    Interface for objects that are interested in kernel events.
@@ -53,12 +54,14 @@ public interface KernelListener {
      */
     void simulatorRemoved(Kernel kernel, SimulatorProxy simulator);
 
+    void viewerAdded(Kernel kernel, Viewer viewer);
+
     /**
        Notification that a viewer has been added.
        @param kernel The kernel.
        @param viewer The viewer that was added.
      */
-    void viewerAdded(Kernel kernel, ViewerProxy viewer);
+    void viewerProxyAdded(Kernel kernel, ViewerProxy viewer);
 
     /**
        Notification that a viewer has been removed.

@@ -1,6 +1,7 @@
 package kernel;
 
 import rescuecore2.Timestep;
+import rescuecore2.components.Viewer;
 
 /**
    Abstract class for objects that want to implement a subset of the KernelListener interface. All default method implementations do nothing.
@@ -28,7 +29,12 @@ public class KernelListenerAdapter implements KernelListener {
     public void simulatorRemoved(Kernel kernel, SimulatorProxy simulator) {}
 
     @Override
-    public void viewerAdded(Kernel kernel, ViewerProxy viewer) {}
+    public void viewerProxyAdded(Kernel kernel, ViewerProxy viewer) {}
+
+    @Override
+    public void viewerAdded(Kernel k, Viewer info) {
+        System.err.println("KernelStatus.viewerAdded is called!!");
+    }
 
     @Override
     public void viewerRemoved(Kernel kernel, ViewerProxy viewer) {}

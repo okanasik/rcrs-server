@@ -1,45 +1,31 @@
 package sample;
 
-import static rescuecore2.misc.java.JavaTools.instantiate;
-
-import rescuecore2.messages.control.KVTimestep;
-import rescuecore2.view.ViewComponent;
-import rescuecore2.view.ViewListener;
-import rescuecore2.view.RenderedObject;
-import rescuecore2.score.ScoreFunction;
 import rescuecore2.Constants;
 import rescuecore2.Timestep;
-
+import rescuecore2.messages.Command;
+import rescuecore2.messages.control.KVTimestep;
+import rescuecore2.score.ScoreFunction;
+import rescuecore2.standard.components.StandardViewer;
 import rescuecore2.standard.view.AnimatedWorldModelViewer;
+import rescuecore2.view.RenderedObject;
+import rescuecore2.view.ViewComponent;
+import rescuecore2.view.ViewListener;
+import rescuecore2.worldmodel.ChangeSet;
 
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Color;
-import java.awt.Font;
-
-import java.awt.Graphics;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsEnvironment;
-import java.awt.Transparency;
-import java.awt.image.BufferedImage;
-
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.imageio.ImageIO;
-
-import java.util.List;
-import java.text.NumberFormat;
-
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.NumberFormat;
+import java.util.Collection;
+import java.util.List;
 
-import rescuecore2.standard.components.StandardViewer;
+import static rescuecore2.misc.java.JavaTools.instantiate;
 
 /**
    A simple viewer.
@@ -183,6 +169,8 @@ public class LiveLogExtractor extends StandardViewer {
             });
     }
 
+
+
     @Override
     public String toString() {
         return "Sample viewer";
@@ -242,5 +230,40 @@ public class LiveLogExtractor extends StandardViewer {
         ScoreFunction result = instantiate(className, ScoreFunction.class);
         result.initialise(model, config);
         return result;
+    }
+
+    // replaces handleTimestep
+    @Override
+    public void setTimestep(int time, Collection<Command> commandList, ChangeSet changeSet) {
+        model.merge(changeSet);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                timeLabel.setText("Time: " + time);
+                double score = scoreFunction.score(model, new Timestep(time));
+                scoreLabel.setText("Score: " + format.format(score));
+                viewer.view(model, commandList);
+                viewer.repaint();
+
+                if (time == 1) {
+                    writeImage(outdir + "/snapshot-init.png");
+                }
+                else if (time % 50 == 0) {
+                    writeImage(outdir + "/snapshot-" + time + ".png");
+                }
+                appendFile(outdir + "/scores.txt", " " + String.valueOf(score));
+                if (time == Integer.parseInt(config.getValue("kernel.timesteps"))) {
+                    writeImage(outdir + "/snapshot-final.png");
+                    writeFile(outdir + "/final-score.txt", String.valueOf(score));
+                    try {
+                        Thread.sleep(100000);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    System.exit(0);
+                }
+
+            }
+        });
+
     }
 }

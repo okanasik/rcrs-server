@@ -3,6 +3,7 @@ package kernel;
 
 import rescuecore2.Constants;
 import rescuecore2.Timestep;
+import rescuecore2.components.Viewer;
 import rescuecore2.config.Config;
 import rescuecore2.log.CommandsRecord;
 import rescuecore2.log.ConfigRecord;
@@ -24,6 +25,7 @@ import rescuecore2.worldmodel.WorldModel;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -50,7 +52,7 @@ public class Kernel {
 
     private Collection<AgentProxy> agents;
     private Collection<SimulatorProxy> sims;
-    private Collection<ViewerProxy> viewers;
+    private Collection<ViewerProxy> viewerProxies;
     private int time;
     private Timestep previousTimestep;
 
@@ -62,6 +64,8 @@ public class Kernel {
     private CommandCollector commandCollector;
 
     private boolean isShutdown;
+
+    private Collection<Viewer> viewers;
 
     //    private ChangeSetComponent simulatorChanges;
 
@@ -106,7 +110,7 @@ public class Kernel {
                 }
             });
             sims = new HashSet<SimulatorProxy>();
-            viewers = new HashSet<ViewerProxy>();
+            viewerProxies = new HashSet<ViewerProxy>();
             time = 0;
             try {
                 if (!config.getBooleanValue("nolog")) {
@@ -145,6 +149,8 @@ public class Kernel {
             commandCollector.initialise(config);
 
             isShutdown = false;
+
+            viewers = new ArrayList<>();
 
             Logger.info("Kernel initialised");
             Logger.info("Perception module: " + perception);
@@ -240,15 +246,20 @@ public class Kernel {
         }
     }
 
+    public void addViewer(Viewer viewer) {
+        viewers.add(viewer);
+        fireViewerAdded(viewer);
+    }
+
     /**
        Add a viewer to the system.
        @param viewer The viewer to add.
     */
-    public void addViewer(ViewerProxy viewer) {
+    public void addViewerProxy(ViewerProxy viewer) {
         synchronized (this) {
-            viewers.add(viewer);
+            viewerProxies.add(viewer);
         }
-        fireViewerAdded(viewer);
+        fireViewerProxyAdded(viewer);
     }
 
     /**
@@ -257,7 +268,7 @@ public class Kernel {
     */
     public void removeViewer(ViewerProxy viewer) {
         synchronized (this) {
-            viewers.remove(viewer);
+            viewerProxies.remove(viewer);
         }
         fireViewerRemoved(viewer);
     }
@@ -268,7 +279,7 @@ public class Kernel {
     */
     public Collection<ViewerProxy> getAllViewers() {
         synchronized (this) {
-            return Collections.unmodifiableCollection(viewers);
+            return Collections.unmodifiableCollection(viewerProxies);
         }
     }
 
@@ -278,6 +289,7 @@ public class Kernel {
     */
     public void addKernelListener(KernelListener l) {
         synchronized (listeners) {
+            System.out.println("kernellistener l:" + l);
             listeners.add(l);
         }
     }
@@ -427,7 +439,7 @@ public class Kernel {
 //                    }));
                 proxy.shutdown();
             }
-            for (ViewerProxy next : viewers) {
+            for (ViewerProxy next : viewerProxies) {
                 final ViewerProxy proxy = next;
 //                callables.add(Executors.callable(new Runnable() {
 //                        @Override
@@ -508,8 +520,11 @@ public class Kernel {
     }
 
     private void sendToViewers(Timestep timestep) {
-        for (ViewerProxy next : viewers) {
+        for (ViewerProxy next : viewerProxies) {
             next.sendTimestep(timestep);
+        }
+        for (Viewer next : viewers) {
+            next.setTimestep(timestep.getTime(), timestep.getCommands(), timestep.getChangeSet());
         }
     }
 
@@ -562,10 +577,16 @@ public class Kernel {
             next.simulatorRemoved(this, sim);
         }
     }
-
-    private void fireViewerAdded(ViewerProxy viewer) {
+    
+    private void fireViewerAdded(Viewer viewer) {
         for (KernelListener next : getListeners()) {
             next.viewerAdded(this, viewer);
+        }
+    }
+
+    private void fireViewerProxyAdded(ViewerProxy viewer) {
+        for (KernelListener next : getListeners()) {
+            next.viewerProxyAdded(this, viewer);
         }
     }
 

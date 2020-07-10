@@ -254,7 +254,7 @@ public class ComponentManager implements ConnectionManagerListener,
 				if (next.requestID == requestID && next.viewerID == viewerID
 						&& next.connection == c) {
 					viewersToAcknowledge.remove(next);
-					kernel.addViewer(next.viewer);
+					kernel.addViewerProxy(next.viewer);
 					viewerLock.notifyAll();
 					return true;
 				}

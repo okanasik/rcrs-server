@@ -11,6 +11,7 @@ import rescuecore2.components.Component;
 import rescuecore2.components.ComponentConnectionException;
 import rescuecore2.components.ComponentInitialisationException;
 import rescuecore2.components.ComponentLauncher;
+import rescuecore2.components.Viewer;
 import rescuecore2.config.ClassNameSetValueConstraint;
 import rescuecore2.config.ClassNameValueConstraint;
 import rescuecore2.config.Config;
@@ -339,11 +340,24 @@ public final class StartKernel {
 		KernelStartupOptions options = info.options;
 		Collection<Callable<Void>> all = new ArrayList<Callable<Void>>();
 		Config launchConfig = new Config(config);
-		// keeps only random seed
+		// keeps only random seed and team name
 		launchConfig.removeExcept(Constants.RANDOM_SEED_KEY,
 				Constants.RANDOM_CLASS_KEY, "kernel.team");
 		for (Pair<String, Integer> next : options.getInlineComponents()) {
 			if (next.second() > 0) {
+//			    System.out.println("component:" + next.first());
+			    if (next.first().equals("sample.SampleViewer")) {
+                    Viewer viewer = instantiate(next.first(), Viewer.class);
+                    try {
+                        viewer.initialise();
+                    } catch (ComponentInitialisationException ex) {
+                        ex.printStackTrace();
+                    }
+                    viewer.setConfig(launchConfig);
+                    viewer.initViewer(123456789, info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
+                    info.kernel.addViewer(viewer);
+			        continue;
+                }
                 ComponentStarter cs = new ComponentStarter(next.first(),
                         info.componentManager, next.second(), registry, gui,
                         launchConfig);
