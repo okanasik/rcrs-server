@@ -23,7 +23,6 @@ import rescuecore2.log.LogException;
 import rescuecore2.log.Logger;
 import rescuecore2.misc.CommandLineOptions;
 import rescuecore2.misc.MutableBoolean;
-import rescuecore2.misc.Pair;
 import rescuecore2.misc.java.LoadableType;
 import rescuecore2.misc.java.LoadableTypeProcessor;
 import rescuecore2.registry.EntityFactory;
@@ -343,27 +342,58 @@ public final class StartKernel {
 		// keeps only random seed and team name
 		launchConfig.removeExcept(Constants.RANDOM_SEED_KEY,
 				Constants.RANDOM_CLASS_KEY, "kernel.team");
-		for (Pair<String, Integer> next : options.getInlineComponents()) {
-			if (next.second() > 0) {
-//			    System.out.println("component:" + next.first());
-			    if (next.first().equals("sample.SampleViewer")) {
-                    Viewer viewer = instantiate(next.first(), Viewer.class);
-                    try {
-                        viewer.initialise();
-                    } catch (ComponentInitialisationException ex) {
-                        ex.printStackTrace();
-                    }
-                    viewer.setConfig(launchConfig);
-                    viewer.initViewer(123456789, info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
-                    info.kernel.addViewer(viewer);
-			        continue;
+
+		//TODO: create a centralized id generation mechanism
+
+        for (String viewerClass : options.getAvailableViewers()) {
+            int instanceCount = options.getInstanceCount(viewerClass);
+            if (instanceCount > 0) {
+//                System.out.println("component:viewer:" + viewerClass + " count:" + instanceCount);
+                Viewer viewer = instantiate(viewerClass, Viewer.class);
+                try {
+                    viewer.initialise();
+                } catch (ComponentInitialisationException ex) {
+                    ex.printStackTrace();
                 }
-                ComponentStarter cs = new ComponentStarter(next.first(),
-                        info.componentManager, next.second(), registry, gui,
+                viewer.setConfig(launchConfig);
+                viewer.initViewer(123456789, info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
+                info.kernel.addViewer(viewer);
+            }
+        }
+
+        for (String simClass : options.getAvailableSimulators()) {
+            int instanceCount = options.getInstanceCount(simClass);
+            if (instanceCount > 0) {
+//                System.out.println("component:sim:" + simClass + " count:" + instanceCount);
+                ComponentStarter cs = new ComponentStarter(simClass,
+                        info.componentManager, instanceCount, registry, gui,
                         launchConfig);
-				all.add(cs);
-			}
-		}
+                all.add(cs);
+            }
+        }
+
+        for (String agentClass : options.getAvailableAgents()) {
+            int instanceCount = options.getInstanceCount(agentClass);
+            if (instanceCount > 0) {
+//                System.out.println("component:agent:" + agentClass + " count:" + instanceCount);
+                ComponentStarter cs = new ComponentStarter(agentClass,
+                        info.componentManager, instanceCount, registry, gui,
+                        launchConfig);
+                all.add(cs);
+            }
+        }
+
+        for (String otherClass : options.getAvailableComponents()) {
+            int instanceCount = options.getInstanceCount(otherClass);
+            if (instanceCount > 0) {
+//                System.out.println("component:other:" + otherClass + " count:" + instanceCount);
+                ComponentStarter cs = new ComponentStarter(otherClass,
+                        info.componentManager, instanceCount, registry, gui,
+                        launchConfig);
+                all.add(cs);
+            }
+        }
+
 		ExecutorService service = Executors.newFixedThreadPool(Runtime
 				.getRuntime().availableProcessors());
 		service.invokeAll(all);
