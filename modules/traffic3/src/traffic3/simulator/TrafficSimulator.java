@@ -1,11 +1,5 @@
 package traffic3.simulator;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import javax.swing.JComponent;
 import org.uncommons.maths.number.NumberGenerator;
 import org.uncommons.maths.random.GaussianGenerator;
 import rescuecore2.GUIComponent;
@@ -52,6 +46,13 @@ import traffic3.manager.TrafficManager;
 import traffic3.objects.TrafficAgent;
 import traffic3.objects.TrafficArea;
 import traffic3.objects.TrafficBlockade;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * The Area model traffic simulator.
@@ -139,7 +140,7 @@ public class TrafficSimulator extends StandardSimulator implements GUIComponent 
 	}
 
 	@Override
-	protected void processCommands(KSCommands c, ChangeSet changes) {
+    public void processCommands(KSCommands c, ChangeSet changes) {
 		long start = System.currentTimeMillis();
 		Logger.info("Timestep " + c.getTime());
 		// Clear all cached blockade information
@@ -246,7 +247,7 @@ public class TrafficSimulator extends StandardSimulator implements GUIComponent 
 	}
 
 	@Override
-	protected void handleUpdate(KSUpdate u) {
+	public void handleUpdate(KSUpdate u) {
 		clearCache(u);
 		super.handleUpdate(u);
 		// ArrayList<ShapeDebugFrame.ShapeInfo> background = new ArrayList<>();

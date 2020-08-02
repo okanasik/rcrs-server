@@ -63,7 +63,7 @@ public class KernelStatus extends JPanel implements KernelListener {
         labels.add(scoreLabel);
         add(labels, BorderLayout.NORTH);
         agents.addAll(kernel.getAllAgents());
-        simulators.addAll(kernel.getAllSimulators());
+        simulators.addAll(kernel.getAllSimulatorProxies());
         viewers.addAll(kernel.getAllViewers());
     }
 

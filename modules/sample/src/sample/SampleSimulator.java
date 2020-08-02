@@ -22,11 +22,11 @@ public class SampleSimulator extends AbstractSimulator<DefaultWorldModel<Entity>
     }
 
     @Override
-    protected void handleUpdate(KSUpdate u) {
+    public void handleUpdate(KSUpdate u) {
         super.handleUpdate(u);
     }
 
     @Override
-    protected void processCommands(KSCommands c, ChangeSet changes) {
+    public void processCommands(KSCommands c, ChangeSet changes) {
     }
 }

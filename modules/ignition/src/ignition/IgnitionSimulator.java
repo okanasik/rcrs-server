@@ -34,7 +34,7 @@ public class IgnitionSimulator extends StandardSimulator {
     }
 
     @Override
-    protected void processCommands(KSCommands c, ChangeSet changes) {
+    public void processCommands(KSCommands c, ChangeSet changes) {
         long start = System.currentTimeMillis();
         int time = c.getTime();
         Logger.info("Timestep " + time);

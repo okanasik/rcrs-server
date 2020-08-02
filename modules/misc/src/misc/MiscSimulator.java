@@ -1,38 +1,32 @@
 package misc;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.HashSet;
-
-import javax.swing.JComponent;
-
+import rescuecore2.GUIComponent;
+import rescuecore2.log.Logger;
 import rescuecore2.messages.Command;
 import rescuecore2.messages.control.KSCommands;
 import rescuecore2.messages.control.KSUpdate;
 import rescuecore2.misc.geometry.GeometryTools2D;
 import rescuecore2.misc.geometry.Point2D;
-import rescuecore2.worldmodel.Entity;
-import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.EntityListener;
-import rescuecore2.worldmodel.Property;
-import rescuecore2.worldmodel.ChangeSet;
-import rescuecore2.log.Logger;
-
+import rescuecore2.standard.components.StandardSimulator;
+import rescuecore2.standard.entities.AmbulanceTeam;
 import rescuecore2.standard.entities.Building;
 import rescuecore2.standard.entities.GasStation;
-import rescuecore2.standard.entities.Refuge;
 import rescuecore2.standard.entities.Human;
-import rescuecore2.standard.entities.AmbulanceTeam;
+import rescuecore2.standard.entities.Refuge;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardPropertyURN;
 import rescuecore2.standard.messages.AKRescue;
-import rescuecore2.standard.components.StandardSimulator;
+import rescuecore2.worldmodel.ChangeSet;
+import rescuecore2.worldmodel.Entity;
+import rescuecore2.worldmodel.EntityID;
 
-import rescuecore2.GUIComponent;
-
+import javax.swing.*;
 import java.util.Formatter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation of the legacy misc simulator.
@@ -82,15 +76,12 @@ public class MiscSimulator extends StandardSimulator implements GUIComponent {
 		newlyBrokenBuildings = new HashSet<EntityID>();
 		Logger.info("MiscSimulator connected. World has "
 				+ model.getAllEntities().size() + " entities.");
-		BuildingChangeListener buildingListener = new BuildingChangeListener();
 		// HumanChangeListener humanListener = new HumanChangeListener();
 		for (Entity et : model.getAllEntities()) {
 			if (et instanceof GasStation) {
 				notExplosedGasStations.add(et.getID());
 			}
-			if (et instanceof Building) {
-				et.addEntityListener(buildingListener);
-			} else if (et instanceof Human) {
+			if (et instanceof Human) {
 				// et.addEntityListener(humanListener);
 				Human human = (Human) et;
 				HumanAttributes ha = new HumanAttributes(human, config);
@@ -100,7 +91,7 @@ public class MiscSimulator extends StandardSimulator implements GUIComponent {
 	}
 
 	@Override
-	protected void processCommands(KSCommands c, ChangeSet changes) {
+	public void processCommands(KSCommands c, ChangeSet changes) {
 		long start = System.currentTimeMillis();
 		int time = c.getTime();
 		Logger.info("Timestep " + time);
@@ -127,6 +118,14 @@ public class MiscSimulator extends StandardSimulator implements GUIComponent {
 		if (gui != null) {
 			gui.refresh(humans.values());
 		}
+
+		// keep track of the latest state of the broken buildings
+        for (StandardEntity entity : model) {
+            if (entity instanceof Building) {
+                oldBrokenBuildingsBuriedness.put(entity.getID(), parameters.getBuriedness((Building) entity));
+            }
+        }
+
 		long end = System.currentTimeMillis();
 		Logger.info("Timestep " + time + " took " + (end - start) + " ms");
 	}
@@ -342,37 +341,16 @@ public class MiscSimulator extends StandardSimulator implements GUIComponent {
 		changes.addChange(target, target.getBuriednessProperty());
 	}
 
-	private class BuildingChangeListener implements EntityListener {
-		@Override
-		public void propertyChanged(Entity e, Property p, Object oldValue,
-									Object newValue) {
-			if (!(e instanceof Building)) {
-				return; // we want to only look at buildings
-			}
-
-			if (p.getURN().equals(StandardPropertyURN.BROKENNESS.toString()))
-				checkBrokenness(e, oldValue, newValue);
-
-		}
-
-		private void checkBrokenness(Entity e, Object oldValue, Object newValue) {
-			double old = oldValue == null ? 0 : (Integer) oldValue;
-			double next = newValue == null ? 0 : (Integer) newValue;
-			if (next > old) {
-				newlyBrokenBuildings.add(e.getID());
-
-			}
-		}
-
-	}
-
 	@Override
-	protected void handleUpdate(KSUpdate u) {
-		for (StandardEntity entity : model) {
-			if (entity instanceof Building) {
-				oldBrokenBuildingsBuriedness.put(entity.getID(), parameters.getBuriedness((Building) entity));
-			}
-		}
+	public void handleUpdate(KSUpdate u) {
+	    // get the newly broken buildings
+        for (EntityID id : u.getChangeSet().getChangedEntities()) {
+            if (model.getEntity(id) instanceof Building) {
+                if (u.getChangeSet().getChangeMap().get(id).containsKey(StandardPropertyURN.BROKENNESS)) {
+                    newlyBrokenBuildings.add(id);
+                }
+            }
+        }
 		super.handleUpdate(u);
 	}
 }

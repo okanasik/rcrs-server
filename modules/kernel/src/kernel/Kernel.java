@@ -3,6 +3,7 @@ package kernel;
 
 import rescuecore2.Constants;
 import rescuecore2.Timestep;
+import rescuecore2.components.Simulator;
 import rescuecore2.components.Viewer;
 import rescuecore2.config.Config;
 import rescuecore2.log.CommandsRecord;
@@ -17,6 +18,7 @@ import rescuecore2.log.PerceptionRecord;
 import rescuecore2.log.StartLogRecord;
 import rescuecore2.log.UpdatesRecord;
 import rescuecore2.messages.Command;
+import rescuecore2.messages.control.KSUpdate;
 import rescuecore2.score.ScoreFunction;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.Entity;
@@ -51,7 +53,7 @@ public class Kernel {
     private Set<KernelListener> listeners;
 
     private Collection<AgentProxy> agents;
-    private Collection<SimulatorProxy> sims;
+    private Collection<SimulatorProxy> simProxies;
     private Collection<ViewerProxy> viewerProxies;
     private int time;
     private Timestep previousTimestep;
@@ -66,6 +68,7 @@ public class Kernel {
     private boolean isShutdown;
 
     private Collection<Viewer> viewers;
+    private Collection<Simulator> sims;
 
     //    private ChangeSetComponent simulatorChanges;
 
@@ -109,7 +112,7 @@ public class Kernel {
                     return Integer.compare(o1.hashCode(), o2.hashCode());
                 }
             });
-            sims = new HashSet<SimulatorProxy>();
+            simProxies = new HashSet<SimulatorProxy>();
             viewerProxies = new HashSet<ViewerProxy>();
             time = 0;
             try {
@@ -151,6 +154,7 @@ public class Kernel {
             isShutdown = false;
 
             viewers = new ArrayList<>();
+            sims = new ArrayList<>();
 
             Logger.info("Kernel initialised");
             Logger.info("Perception module: " + perception);
@@ -213,13 +217,26 @@ public class Kernel {
         }
     }
 
+    public void addSimulator(Simulator sim) {
+        sims.add(sim);
+        //todo: check whether we need sim.setEntityIDGenerator(idGenerator);
+        //todo: add fireSimulatorAdded(sim);
+    }
+    public void removeSimulator(Simulator sim) {
+        sims.remove(sim);
+        //todo: add fireSimulatorRemoved(sim);
+    }
+    public Collection<Simulator> getSimulators() {
+        return Collections.unmodifiableCollection(sims);
+    }
+
     /**
        Add a simulator to the system.
        @param sim The simulator to add.
     */
-    public void addSimulator(SimulatorProxy sim) {
+    public void addSimulatorProxy(SimulatorProxy sim) {
         synchronized (this) {
-            sims.add(sim);
+            simProxies.add(sim);
             sim.setEntityIDGenerator(idGenerator);
         }
         fireSimulatorAdded(sim);
@@ -229,9 +246,9 @@ public class Kernel {
        Remove a simulator from the system.
        @param sim The simulator to remove.
     */
-    public void removeSimulator(SimulatorProxy sim) {
+    public void removeSimulatorProxy(SimulatorProxy sim) {
         synchronized (this) {
-            sims.remove(sim);
+            simProxies.remove(sim);
         }
         fireSimulatorRemoved(sim);
     }
@@ -240,9 +257,9 @@ public class Kernel {
        Get all simulators in the system.
        @return An unmodifiable view of all simulators.
     */
-    public Collection<SimulatorProxy> getAllSimulators() {
+    public Collection<SimulatorProxy> getAllSimulatorProxies() {
         synchronized (this) {
-            return Collections.unmodifiableCollection(sims);
+            return Collections.unmodifiableCollection(simProxies);
         }
     }
 
@@ -429,7 +446,7 @@ public class Kernel {
 //                    }));
                 proxy.shutdown();
             }
-            for (SimulatorProxy next : sims) {
+            for (SimulatorProxy next : simProxies) {
                 final SimulatorProxy proxy = next;
 //                callables.add(Executors.callable(new Runnable() {
 //                        @Override
@@ -501,12 +518,12 @@ public class Kernel {
        Send commands to all simulators and return which entities have been updated by the simulators.
     */
     private ChangeSet sendCommandsToSimulators(int timestep, Collection<Command> commands) throws InterruptedException {
-        for (SimulatorProxy next : sims) {
+        for (SimulatorProxy next : simProxies) {
             next.sendAgentCommands(timestep, commands);
         }
         // Wait until all simulators have sent updates
         ChangeSet result = new ChangeSet();
-        for (SimulatorProxy next : sims) {
+        for (SimulatorProxy next : simProxies) {
             Logger.debug("Fetching updates from " + next);
             result.merge(next.getUpdates(timestep));
         }
@@ -514,8 +531,12 @@ public class Kernel {
     }
 
     private void sendUpdatesToSimulators(int timestep, ChangeSet updates) throws InterruptedException {
-        for (SimulatorProxy next : sims) {
+        for (SimulatorProxy next : simProxies) {
             next.sendUpdate(timestep, updates);
+        }
+        for (Simulator sim : sims) {
+            //todo: set the correct id
+            sim.handleUpdate(new KSUpdate(0, timestep, updates));
         }
     }
 

@@ -53,7 +53,7 @@ public abstract class AbstractViewer<T extends WorldModel<? extends Entity>> ext
 
     // replace postConnect
     @Override
-    public void initViewer(int id, Collection<? extends Entity> entities, Config kernelConfig) {
+    public void initComponent(int id, Collection<? extends Entity> entities, Config kernelConfig) {
         this.viewerID = id;
         lastUpdateTime = 0;
         initComponent(entities, kernelConfig);

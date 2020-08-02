@@ -4,6 +4,9 @@ import rescuecore2.config.Config;
 import rescuecore2.connection.Connection;
 import rescuecore2.connection.ConnectionException;
 import rescuecore2.registry.Registry;
+import rescuecore2.worldmodel.Entity;
+
+import java.util.Collection;
 
 /**
    Top-level interface for components of the Robocup Rescue simulation. Agents, simulators and viewers are all components.
@@ -52,4 +55,7 @@ public interface Component {
 
     // replace connect
     void setConfig(Config config);
+
+    // replace postConnect
+    void initComponent(int id, Collection<? extends Entity> entities, Config config);
 }

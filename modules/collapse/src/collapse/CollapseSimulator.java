@@ -1,50 +1,46 @@
 package collapse;
 
+import org.uncommons.maths.Maths;
+import org.uncommons.maths.number.NumberGenerator;
+import org.uncommons.maths.random.ContinuousUniformGenerator;
+import org.uncommons.maths.random.GaussianGenerator;
+import rescuecore2.GUIComponent;
 import rescuecore2.config.Config;
+import rescuecore2.log.Logger;
 import rescuecore2.messages.Message;
 import rescuecore2.messages.control.KSAfterShocksInfo;
 import rescuecore2.messages.control.KSCommands;
+import rescuecore2.misc.collections.LazyMap;
+import rescuecore2.misc.geometry.GeometryTools2D;
+import rescuecore2.misc.geometry.Line2D;
+import rescuecore2.misc.geometry.Point2D;
+import rescuecore2.misc.geometry.Vector2D;
+import rescuecore2.standard.components.StandardSimulator;
+import rescuecore2.standard.entities.Blockade;
+import rescuecore2.standard.entities.Building;
+import rescuecore2.standard.entities.Edge;
+import rescuecore2.standard.entities.Road;
+import rescuecore2.standard.entities.StandardEntity;
+import rescuecore2.standard.entities.StandardEntityConstants;
+import rescuecore2.standard.entities.StandardEntityURN;
+import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.WorldModelListener;
 import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.misc.geometry.Point2D;
-import rescuecore2.misc.geometry.Line2D;
-import rescuecore2.misc.geometry.Vector2D;
-import rescuecore2.misc.geometry.GeometryTools2D;
-import rescuecore2.misc.collections.LazyMap;
-import rescuecore2.log.Logger;
-import rescuecore2.GUIComponent;
+import rescuecore2.worldmodel.WorldModelListener;
 
-import rescuecore2.standard.components.StandardSimulator;
-import rescuecore2.standard.entities.StandardEntity;
-import rescuecore2.standard.entities.StandardEntityURN;
-import rescuecore2.standard.entities.StandardEntityConstants;
-import rescuecore2.standard.entities.Building;
-import rescuecore2.standard.entities.Road;
-import rescuecore2.standard.entities.Edge;
-import rescuecore2.standard.entities.Blockade;
-import rescuecore2.standard.entities.StandardWorldModel;
-
-import org.uncommons.maths.random.GaussianGenerator;
-import org.uncommons.maths.random.ContinuousUniformGenerator;
-import org.uncommons.maths.number.NumberGenerator;
-import org.uncommons.maths.Maths;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.List;
+import javax.swing.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import java.awt.geom.Path2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.PathIterator;
-
-import javax.swing.JComponent;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A simple collapse simulator.
@@ -218,7 +214,7 @@ public class CollapseSimulator extends StandardSimulator implements
 	}
 
 	@Override
-	protected void processCommands(KSCommands c, ChangeSet changes) {
+    public void processCommands(KSCommands c, ChangeSet changes) {
 		long start = System.currentTimeMillis();
 		int time = c.getTime();
 		Logger.info("Timestep " + time);

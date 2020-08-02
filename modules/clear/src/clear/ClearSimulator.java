@@ -1,15 +1,5 @@
 package clear;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-
 import rescuecore2.log.Logger;
 import rescuecore2.messages.Command;
 import rescuecore2.messages.control.KSCommands;
@@ -19,7 +9,6 @@ import rescuecore2.misc.geometry.Point2D;
 import rescuecore2.standard.components.StandardSimulator;
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.Blockade;
-import rescuecore2.standard.entities.Edge;
 import rescuecore2.standard.entities.PoliceForce;
 import rescuecore2.standard.entities.Road;
 import rescuecore2.standard.entities.StandardEntity;
@@ -27,6 +16,14 @@ import rescuecore2.standard.messages.AKClear;
 import rescuecore2.standard.messages.AKClearArea;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.EntityID;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
    The area model clear simulator. This simulator processes AKClear messages.
@@ -46,8 +43,7 @@ public class ClearSimulator extends StandardSimulator {
     }
 
     @Override
-
-    protected void processCommands(KSCommands c, ChangeSet changes) {
+    public void processCommands(KSCommands c, ChangeSet changes) {
         long start = System.currentTimeMillis();
         int time = c.getTime();
         Logger.info("Timestep " + time);

@@ -21,9 +21,6 @@ public interface Viewer extends Component {
      */
     void postConnect(Connection c, int viewerID, Collection<Entity> entities, Config config);
 
-    // replace postConnect
-    void initViewer(int viewerID, Collection<? extends Entity> entities, Config config);
-
     // replaces messaging of the viewer
     void setTimestep(int time, Collection<Command> commandList, ChangeSet changeSet);
 }

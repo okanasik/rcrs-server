@@ -11,6 +11,7 @@ import rescuecore2.components.Component;
 import rescuecore2.components.ComponentConnectionException;
 import rescuecore2.components.ComponentInitialisationException;
 import rescuecore2.components.ComponentLauncher;
+import rescuecore2.components.Simulator;
 import rescuecore2.components.Viewer;
 import rescuecore2.config.ClassNameSetValueConstraint;
 import rescuecore2.config.ClassNameValueConstraint;
@@ -356,8 +357,13 @@ public final class StartKernel {
                     ex.printStackTrace();
                 }
                 viewer.setConfig(launchConfig);
-                viewer.initViewer(123456789, info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
+                viewer.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
                 info.kernel.addViewer(viewer);
+
+//                ComponentStarter cs = new ComponentStarter(viewerClass,
+//                        info.componentManager, instanceCount, registry, gui,
+//                        launchConfig);
+//                all.add(cs);
             }
         }
 
@@ -365,10 +371,20 @@ public final class StartKernel {
             int instanceCount = options.getInstanceCount(simClass);
             if (instanceCount > 0) {
 //                System.out.println("component:sim:" + simClass + " count:" + instanceCount);
-                ComponentStarter cs = new ComponentStarter(simClass,
-                        info.componentManager, instanceCount, registry, gui,
-                        launchConfig);
-                all.add(cs);
+                Simulator sim = instantiate(simClass, Simulator.class);
+                try {
+                    sim.initialise();
+                } catch (ComponentInitialisationException ex) {
+                    ex.printStackTrace();
+                }
+                sim.setConfig(launchConfig);
+                sim.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
+                info.kernel.addSimulator(sim);
+
+//                ComponentStarter cs = new ComponentStarter(simClass,
+//                        info.componentManager, instanceCount, registry, gui,
+//                        launchConfig);
+//                all.add(cs);
             }
         }
 

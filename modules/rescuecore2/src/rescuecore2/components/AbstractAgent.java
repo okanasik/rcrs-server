@@ -45,6 +45,12 @@ public abstract class AbstractAgent<T extends WorldModel<? extends Entity>, E ex
     }
 
     @Override
+    public final void initComponent(int id, Collection<? extends Entity> entities, Config kernelConfig) {
+        this.entityID = new EntityID(id);
+        super.initComponent(entities, kernelConfig);
+    }
+
+    @Override
     public EntityID getID() {
         return entityID;
     }

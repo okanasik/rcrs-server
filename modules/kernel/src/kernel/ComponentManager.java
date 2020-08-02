@@ -239,7 +239,7 @@ public class ComponentManager implements ConnectionManagerListener,
 						&& next.simulatorID == simulatorID
 						&& next.connection == c) {
 					simsToAcknowledge.remove(next);
-					kernel.addSimulator(next.sim);
+					kernel.addSimulatorProxy(next.sim);
 					simLock.notifyAll();
 					return true;
 				}
@@ -263,13 +263,7 @@ public class ComponentManager implements ConnectionManagerListener,
 		}
 	}
 
-	private int getNextSimulatorID() {
-		synchronized (idLock) {
-			return nextID++;
-		}
-	}
-
-	private int getNextViewerID() {
+	public int getNextID() {
 		synchronized (idLock) {
 			return nextID++;
 		}
@@ -432,7 +426,7 @@ public class ComponentManager implements ConnectionManagerListener,
 
 		private void handleSKConnect(SKConnect msg, Connection connection)
 				throws UncompatibleScenarioException {
-			int simID = getNextSimulatorID();
+			int simID = getNextID();
 			int requestID = msg.getRequestID();
 			Logger.info("Simulator '" + msg.getSimulatorName() + "' id "
 					+ simID + " (" + connection + " request ID " + requestID
@@ -478,7 +472,7 @@ public class ComponentManager implements ConnectionManagerListener,
 
 		private void handleVKConnect(VKConnect msg, Connection connection) {
 			int requestID = msg.getRequestID();
-			int viewerID = getNextViewerID();
+			int viewerID = getNextID();
 			Logger.info("Viewer '" + msg.getViewerName() + "' id " + viewerID
 					+ " (" + connection + " request ID " + requestID
 					+ ") connected");

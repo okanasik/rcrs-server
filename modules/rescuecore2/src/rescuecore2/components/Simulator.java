@@ -1,8 +1,11 @@
 package rescuecore2.components;
 
-import rescuecore2.connection.Connection;
-import rescuecore2.worldmodel.Entity;
 import rescuecore2.config.Config;
+import rescuecore2.connection.Connection;
+import rescuecore2.messages.control.KSCommands;
+import rescuecore2.messages.control.KSUpdate;
+import rescuecore2.worldmodel.ChangeSet;
+import rescuecore2.worldmodel.Entity;
 
 import java.util.Collection;
 
@@ -18,4 +21,7 @@ public interface Simulator extends Component {
        @param config The Config the kernel send to this simulator on connection.
      */
     void postConnect(Connection c, int simulatorID, Collection<Entity> entities, Config config);
+
+    void handleUpdate(KSUpdate update);
+    void processCommands(KSCommands commands, ChangeSet change);
 }

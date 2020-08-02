@@ -1,41 +1,39 @@
 package firesimulator;
 
-import rescuecore2.config.NoSuchConfigOptionException;
-import rescuecore2.worldmodel.Entity;
-import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.ChangeSet;
-import rescuecore2.messages.Command;
-import rescuecore2.messages.control.KSUpdate;
-import rescuecore2.messages.control.KSCommands;
-import rescuecore2.log.Logger;
-
-import rescuecore2.standard.messages.AKExtinguish;
-import rescuecore2.standard.components.StandardSimulator;
-import rescuecore2.standard.entities.StandardEntity;
-import rescuecore2.standard.entities.StandardEntityURN;
-
-import firesimulator.world.Hydrant;
-import firesimulator.world.World;
-import firesimulator.world.WorldInfo;
-import firesimulator.world.Refuge;
-import firesimulator.world.FireStation;
-import firesimulator.world.PoliceOffice;
+import firesimulator.gui.FireSimulatorGUI;
+import firesimulator.simulator.ExtinguishRequest;
+import firesimulator.simulator.Simulator;
+import firesimulator.util.Configuration;
 import firesimulator.world.AmbulanceCenter;
+import firesimulator.world.AmbulanceTeam;
 import firesimulator.world.Building;
 import firesimulator.world.Civilian;
 import firesimulator.world.FireBrigade;
-import firesimulator.world.PoliceForce;
-import firesimulator.world.AmbulanceTeam;
-import firesimulator.world.RescueObject;
+import firesimulator.world.FireStation;
+import firesimulator.world.Hydrant;
 import firesimulator.world.MovingObject;
-import firesimulator.simulator.Simulator;
-import firesimulator.simulator.ExtinguishRequest;
-import firesimulator.util.Configuration;
-
-import java.util.Collection;
-import firesimulator.gui.*;
-import javax.swing.JComponent;
+import firesimulator.world.PoliceForce;
+import firesimulator.world.PoliceOffice;
+import firesimulator.world.Refuge;
+import firesimulator.world.RescueObject;
+import firesimulator.world.World;
+import firesimulator.world.WorldInfo;
 import rescuecore2.GUIComponent;
+import rescuecore2.config.NoSuchConfigOptionException;
+import rescuecore2.log.Logger;
+import rescuecore2.messages.Command;
+import rescuecore2.messages.control.KSCommands;
+import rescuecore2.messages.control.KSUpdate;
+import rescuecore2.standard.components.StandardSimulator;
+import rescuecore2.standard.entities.StandardEntity;
+import rescuecore2.standard.entities.StandardEntityURN;
+import rescuecore2.standard.messages.AKExtinguish;
+import rescuecore2.worldmodel.ChangeSet;
+import rescuecore2.worldmodel.Entity;
+import rescuecore2.worldmodel.EntityID;
+
+import javax.swing.*;
+import java.util.Collection;
 
 /**
    A rescuecore2 Simulator that wraps the ResQ Freiburg fire simulator.
@@ -92,7 +90,7 @@ public class FireSimulatorWrapper extends StandardSimulator implements GUICompon
     }
 
     @Override
-    protected void handleUpdate(KSUpdate u) {
+    public void handleUpdate(KSUpdate u) {
         super.handleUpdate(u);
         // Merge objects
         for (EntityID id : u.getChangeSet().getChangedEntities()) {
@@ -130,7 +128,7 @@ public class FireSimulatorWrapper extends StandardSimulator implements GUICompon
     }
 
     @Override
-    protected void processCommands(KSCommands c, ChangeSet changes) {
+    public void processCommands(KSCommands c, ChangeSet changes) {
         long start = System.currentTimeMillis();
         for (Command next : c.getCommands()) {
             if (next instanceof AKExtinguish) {

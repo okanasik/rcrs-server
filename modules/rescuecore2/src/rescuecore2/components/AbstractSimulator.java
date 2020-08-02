@@ -65,6 +65,12 @@ public abstract class AbstractSimulator<T extends WorldModel<? extends Entity>> 
     }
 
     @Override
+    public void initComponent(int id, Collection<? extends Entity> entities, Config kernelConfig) {
+        this.simulatorID = id;
+        super.initComponent(entities, kernelConfig);
+    }
+
+    @Override
     public void connect(Connection connection, RequestIDGenerator generator, Config config) throws ConnectionException, ComponentConnectionException, InterruptedException {
         this.config = config;
         int requestID = generator.generateRequestID();
@@ -87,7 +93,8 @@ public abstract class AbstractSimulator<T extends WorldModel<? extends Entity>> 
        Handle a KSUpdate object from the server. The default implementation just updates the world model.
        @param u The Update object.
     */
-    protected void handleUpdate(KSUpdate u) {
+    @Override
+    public void handleUpdate(KSUpdate u) {
         ChangeSet changes = u.getChangeSet();
         int time = u.getTime();
         if (time != lastUpdateTime + 1) {
@@ -112,7 +119,7 @@ public abstract class AbstractSimulator<T extends WorldModel<? extends Entity>> 
        @param c The commands to process.
        @param changes The ChangeSet to populate.
     */
-    protected void processCommands(KSCommands c, ChangeSet changes) {
+    public void processCommands(KSCommands c, ChangeSet changes) {
     }
 
     /**
