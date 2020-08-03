@@ -26,8 +26,6 @@ import rescuecore2.standard.entities.StandardEntityURN;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.worldmodel.WorldModelListener;
 
 import javax.swing.*;
 import java.awt.geom.Ellipse2D;
@@ -188,29 +186,6 @@ public class CollapseSimulator extends StandardSimulator implements
 				roadCache.add((Road) next);
 			}
 		}
-		model.addWorldModelListener(new WorldModelListener<StandardEntity>() {
-			@Override
-			public void entityAdded(WorldModel<? extends StandardEntity> model,
-					StandardEntity e) {
-				if (e instanceof Building) {
-					buildingCache.add((Building) e);
-				}
-				if (e instanceof Road) {
-					roadCache.add((Road) e);
-				}
-			}
-
-			@Override
-			public void entityRemoved(
-					WorldModel<? extends StandardEntity> model, StandardEntity e) {
-				if (e instanceof Building) {
-					buildingCache.remove((Building) e);
-				}
-				if (e instanceof Road) {
-					roadCache.remove((Road) e);
-				}
-			}
-		});
 	}
 
 	@Override
@@ -277,9 +252,9 @@ public class CollapseSimulator extends StandardSimulator implements
 		return result;
 	}
 
-	static long t1;
-	static long t2;
-	static long t3;
+//	static long t1;
+//	static long t2;
+//	static long t3;
 
 	private Map<Road, Collection<java.awt.geom.Area>> doBlock(
 			Collection<Building> collapsed, int time) {
@@ -483,7 +458,7 @@ public class CollapseSimulator extends StandardSimulator implements
 		/* Aftershock's Requirement: 2013 */
 		double d = remainingfloors * (damage / (double) MAX_COLLAPSE)
 				* currentExtent;
-		t1 += System.currentTimeMillis() - t;
+//		t1 += System.currentTimeMillis() - t;
 		t = System.currentTimeMillis();
 		/* Aftershock's Requirement: 2013 */
 		model().getCSBuiding(b).increaseCollapseRatio(
@@ -515,12 +490,12 @@ public class CollapseSimulator extends StandardSimulator implements
 				existing.add(blockadeToArea(blockade));
 			}
 		}
-		t2 += System.currentTimeMillis() - t;
+//		t2 += System.currentTimeMillis() - t;
 		// Intersect wall areas with roads
 		t = System.currentTimeMillis();
 		Map<Road, Collection<java.awt.geom.Area>> blockadesForRoads = createRoadBlockades(
 				fullArea, existing);
-		t3 += System.currentTimeMillis() - t;
+//		t3 += System.currentTimeMillis() - t;
 		// Add to roadBlockages
 		for (Map.Entry<Road, Collection<java.awt.geom.Area>> entry : blockadesForRoads
 				.entrySet()) {

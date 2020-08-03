@@ -337,6 +337,7 @@ public final class StartKernel {
 
 	private static void autostartComponents(KernelInfo info, Registry registry,
 			KernelGUI gui, Config config) throws InterruptedException {
+	    boolean useProxies = true;
 		KernelStartupOptions options = info.options;
 		Collection<Callable<Void>> all = new ArrayList<Callable<Void>>();
 		Config launchConfig = new Config(config);
@@ -350,20 +351,24 @@ public final class StartKernel {
             int instanceCount = options.getInstanceCount(viewerClass);
             if (instanceCount > 0) {
 //                System.out.println("component:viewer:" + viewerClass + " count:" + instanceCount);
-                Viewer viewer = instantiate(viewerClass, Viewer.class);
-                try {
-                    viewer.initialise();
-                } catch (ComponentInitialisationException ex) {
-                    ex.printStackTrace();
+                if (useProxies) {
+                    ComponentStarter cs = new ComponentStarter(viewerClass,
+                            info.componentManager, instanceCount, registry, gui,
+                            launchConfig);
+                    all.add(cs);
+                } else {
+                    Viewer viewer = instantiate(viewerClass, Viewer.class);
+                    try {
+                        viewer.initialise();
+                    } catch (ComponentInitialisationException ex) {
+                        ex.printStackTrace();
+                    }
+                    viewer.setConfig(launchConfig);
+                    viewer.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
+                    info.kernel.addViewer(viewer);
                 }
-                viewer.setConfig(launchConfig);
-                viewer.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
-                info.kernel.addViewer(viewer);
 
-//                ComponentStarter cs = new ComponentStarter(viewerClass,
-//                        info.componentManager, instanceCount, registry, gui,
-//                        launchConfig);
-//                all.add(cs);
+
             }
         }
 
@@ -371,20 +376,22 @@ public final class StartKernel {
             int instanceCount = options.getInstanceCount(simClass);
             if (instanceCount > 0) {
 //                System.out.println("component:sim:" + simClass + " count:" + instanceCount);
-                Simulator sim = instantiate(simClass, Simulator.class);
-                try {
-                    sim.initialise();
-                } catch (ComponentInitialisationException ex) {
-                    ex.printStackTrace();
+                if (useProxies) {
+                ComponentStarter cs = new ComponentStarter(simClass,
+                        info.componentManager, instanceCount, registry, gui,
+                        launchConfig);
+                all.add(cs);
+                } else {
+                    Simulator sim = instantiate(simClass, Simulator.class);
+                    try {
+                        sim.initialise();
+                    } catch (ComponentInitialisationException ex) {
+                        ex.printStackTrace();
+                    }
+                    sim.setConfig(launchConfig);
+                    sim.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
+                    info.kernel.addSimulator(sim);
                 }
-                sim.setConfig(launchConfig);
-                sim.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
-                info.kernel.addSimulator(sim);
-
-//                ComponentStarter cs = new ComponentStarter(simClass,
-//                        info.componentManager, instanceCount, registry, gui,
-//                        launchConfig);
-//                all.add(cs);
             }
         }
 
@@ -392,10 +399,17 @@ public final class StartKernel {
             int instanceCount = options.getInstanceCount(agentClass);
             if (instanceCount > 0) {
 //                System.out.println("component:agent:" + agentClass + " count:" + instanceCount);
-                ComponentStarter cs = new ComponentStarter(agentClass,
-                        info.componentManager, instanceCount, registry, gui,
-                        launchConfig);
-                all.add(cs);
+                if (useProxies) {
+                    ComponentStarter cs = new ComponentStarter(agentClass,
+                            info.componentManager, instanceCount, registry, gui,
+                            launchConfig);
+                    all.add(cs);
+                } else {
+                    ComponentStarter cs = new ComponentStarter(agentClass,
+                            info.componentManager, instanceCount, registry, gui,
+                            launchConfig);
+                    all.add(cs);
+                }
             }
         }
 
@@ -403,10 +417,17 @@ public final class StartKernel {
             int instanceCount = options.getInstanceCount(otherClass);
             if (instanceCount > 0) {
 //                System.out.println("component:other:" + otherClass + " count:" + instanceCount);
-                ComponentStarter cs = new ComponentStarter(otherClass,
-                        info.componentManager, instanceCount, registry, gui,
-                        launchConfig);
-                all.add(cs);
+                if (useProxies) {
+                    ComponentStarter cs = new ComponentStarter(otherClass,
+                            info.componentManager, instanceCount, registry, gui,
+                            launchConfig);
+                    all.add(cs);
+                } else {
+                    ComponentStarter cs = new ComponentStarter(otherClass,
+                            info.componentManager, instanceCount, registry, gui,
+                            launchConfig);
+                    all.add(cs);
+                }
             }
         }
 

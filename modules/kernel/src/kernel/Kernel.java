@@ -18,6 +18,7 @@ import rescuecore2.log.PerceptionRecord;
 import rescuecore2.log.StartLogRecord;
 import rescuecore2.log.UpdatesRecord;
 import rescuecore2.messages.Command;
+import rescuecore2.messages.control.KSCommands;
 import rescuecore2.messages.control.KSUpdate;
 import rescuecore2.score.ScoreFunction;
 import rescuecore2.worldmodel.ChangeSet;
@@ -526,6 +527,14 @@ public class Kernel {
         for (SimulatorProxy next : simProxies) {
             Logger.debug("Fetching updates from " + next);
             result.merge(next.getUpdates(timestep));
+        }
+
+        for (Simulator sim : sims) {
+            ChangeSet simChange = new ChangeSet();
+            //todo: check whether we need sim id
+            KSCommands cmds = new KSCommands(0, time, commands);
+            sim.processCommands(cmds, simChange);
+            result.merge(simChange);
         }
         return result;
     }
