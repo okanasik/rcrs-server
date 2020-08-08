@@ -1,11 +1,9 @@
 package firesimulator.util;
 
-import java.awt.Point;
-import java.awt.Polygon;
-import java.awt.Rectangle;
-import java.awt.geom.Point2D;
-
 import firesimulator.world.StationaryObject;
+
+import java.awt.*;
+import java.awt.geom.Point2D;
 
 /**
  * @author tn
@@ -90,7 +88,7 @@ public class Geometry {
 		if(mb==null){
             //vertical line
             int p = Math.max(a.y,b.y)-Math.min(a.y,b.y);
-            p = (int) (p*Math.random());
+            p = (int) (p*Rnd.get01());
             p = p + Math.min(a.y,b.y);
             return new Point(a.x,p);
         }
