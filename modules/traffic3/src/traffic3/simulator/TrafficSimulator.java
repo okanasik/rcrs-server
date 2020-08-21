@@ -37,8 +37,6 @@ import rescuecore2.standard.messages.AKUnload;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.worldmodel.WorldModelListener;
 import rescuecore2.worldmodel.properties.EntityRefListProperty;
 import rescuecore2.worldmodel.properties.EntityRefProperty;
 import rescuecore2.worldmodel.properties.IntProperty;
@@ -118,24 +116,6 @@ public class TrafficSimulator extends StandardSimulator implements GUIComponent 
 				convertBlockade((Blockade) next);
 			}
 		}
-		model.addWorldModelListener(new WorldModelListener<StandardEntity>() {
-			@Override
-			public void entityAdded(WorldModel<? extends StandardEntity> model, StandardEntity e) {
-				if (e instanceof Blockade) {
-					convertBlockade((Blockade) e);
-				}
-			}
-
-			@Override
-			public void entityRemoved(WorldModel<? extends StandardEntity> model, StandardEntity e) {
-				if (e instanceof Blockade) {
-					Blockade b = (Blockade) e;
-					TrafficBlockade block = manager.getTrafficBlockade(b);
-					block.getArea().removeBlockade(block);
-					manager.remove(block);
-				}
-			}
-		});
 		manager.cacheInformation(model);
 	}
 
@@ -248,8 +228,30 @@ public class TrafficSimulator extends StandardSimulator implements GUIComponent 
 
 	@Override
 	public void handleUpdate(KSUpdate u) {
+	    // find out newly created blockades in the changeset
+        List<EntityID> newEntityIDs = new ArrayList<>();
+        for (EntityID id : u.getChangeSet().getChangedEntities()) {
+            if (model.getEntity(id) == null && u.getChangeSet().getEntityURN(id).equals(StandardEntityURN.BLOCKADE.toString())) {
+                newEntityIDs.add(id);
+            }
+        }
+
+        // remove from traffic manager newly removed blockades in the changeset
+        for (EntityID id : u.getChangeSet().getDeletedEntities()) {
+            if (model.getEntity(id).getStandardURN() == StandardEntityURN.BLOCKADE) {
+                removeBlockade(id);
+            }
+        }
+
 		clearCache(u);
 		super.handleUpdate(u);
+
+		// add new blockades to the traffic manager
+        // we add after handleUpdate method because blockades are added to the world model
+        for (EntityID id : newEntityIDs) {
+            convertBlockade((Blockade)model.getEntity(id));
+        }
+
 		// ArrayList<ShapeDebugFrame.ShapeInfo> background = new ArrayList<>();
 		// for (StandardEntity entity : model) {
 		// if (entity instanceof Area) {
@@ -267,6 +269,12 @@ public class TrafficSimulator extends StandardSimulator implements GUIComponent 
 		// debug.setBackground(background);
 
 	}
+
+	private void removeBlockade(EntityID id) {
+        TrafficBlockade block = manager.getTrafficBlockade((Blockade) model.getEntity(id));
+        block.getArea().removeBlockade(block);
+        manager.remove(block);
+    }
 
 	private void clearCache(KSUpdate u) {
 		for (EntityID id : u.getChangeSet().getChangedEntities()) {
