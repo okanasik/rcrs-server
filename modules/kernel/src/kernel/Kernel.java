@@ -20,6 +20,7 @@ import rescuecore2.log.UpdatesRecord;
 import rescuecore2.messages.Command;
 import rescuecore2.messages.control.KSCommands;
 import rescuecore2.messages.control.KSUpdate;
+import rescuecore2.messages.control.KVTimestep;
 import rescuecore2.score.ScoreFunction;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.Entity;
@@ -219,8 +220,8 @@ public class Kernel {
     }
 
     public void addSimulator(Simulator sim) {
+        sim.setEntityIDGenerator(idGenerator);
         sims.add(sim);
-        //todo: check whether we need sim.setEntityIDGenerator(idGenerator);
         //todo: add fireSimulatorAdded(sim);
     }
     public void removeSimulator(Simulator sim) {
@@ -531,8 +532,7 @@ public class Kernel {
 
         for (Simulator sim : sims) {
             ChangeSet simChange = new ChangeSet();
-            //todo: check whether we need sim id
-            KSCommands cmds = new KSCommands(0, time, commands);
+            KSCommands cmds = new KSCommands(sim.getID(), timestep, commands);
             sim.processCommands(cmds, simChange);
             result.merge(simChange);
         }
@@ -544,8 +544,7 @@ public class Kernel {
             next.sendUpdate(timestep, updates);
         }
         for (Simulator sim : sims) {
-            //todo: set the correct id
-            sim.handleUpdate(new KSUpdate(0, timestep, updates));
+            sim.handleUpdate(new KSUpdate(sim.getID(), timestep, updates));
         }
     }
 
@@ -554,7 +553,8 @@ public class Kernel {
             next.sendTimestep(timestep);
         }
         for (Viewer next : viewers) {
-            next.setTimestep(timestep.getTime(), timestep.getCommands(), timestep.getChangeSet());
+            KVTimestep kvTimestep = new KVTimestep(next.getID(), timestep.getTime(), timestep.getCommands(), timestep.getChangeSet());
+            next.handleTimestep(kvTimestep);
         }
     }
 

@@ -1,5 +1,6 @@
 package rescuecore2.components;
 
+import kernel.EntityIDGenerator;
 import rescuecore2.connection.Connection;
 import rescuecore2.connection.ConnectionListener;
 import rescuecore2.connection.ConnectionException;
@@ -20,6 +21,7 @@ import rescuecore2.worldmodel.WorldModel;
 import rescuecore2.config.Config;
 import rescuecore2.log.Logger;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
@@ -40,6 +42,8 @@ public abstract class AbstractSimulator<T extends WorldModel<? extends Entity>> 
 
     private Map<Integer, List<EntityID>> idRequests;
     private int nextIDRequest;
+
+    private EntityIDGenerator idGenerator = null;
 
     /**
        Create a new AbstractSimulator.
@@ -128,19 +132,27 @@ public abstract class AbstractSimulator<T extends WorldModel<? extends Entity>> 
        @return A list of new entity IDs.
     */
     protected List<EntityID> requestNewEntityIDs(int count) throws InterruptedException {
-        synchronized (idRequests) {
-            int id = nextIDRequest++;
-            Logger.debug("Requesting " + count + " new IDs: request number " + id);
-            send(new EntityIDRequest(simulatorID, id, count));
-            // Wait for a reply
-            Integer key = id;
-            while (!idRequests.containsKey(key)) {
-                Logger.debug("Waiting for response");
-                idRequests.wait();
+        if (idGenerator != null) {
+            List<EntityID> ids = new ArrayList<>(count);
+            for (int i = 0; i < count; i++) {
+                ids.add(idGenerator.generateID());
             }
-            List<EntityID> result = idRequests.get(key);
-            idRequests.remove(key);
-            return result;
+            return ids;
+        } else {
+            synchronized (idRequests) {
+                int id = nextIDRequest++;
+                Logger.debug("Requesting " + count + " new IDs: request number " + id);
+                send(new EntityIDRequest(simulatorID, id, count));
+                // Wait for a reply
+                Integer key = id;
+                while (!idRequests.containsKey(key)) {
+                    Logger.debug("Waiting for response");
+                    idRequests.wait();
+                }
+                List<EntityID> result = idRequests.get(key);
+                idRequests.remove(key);
+                return result;
+            }
         }
     }
 
@@ -180,6 +192,16 @@ public abstract class AbstractSimulator<T extends WorldModel<? extends Entity>> 
         else {
             return super.processImmediately(msg);
         }
+    }
+
+    @Override
+    public int getID() {
+        return simulatorID;
+    }
+
+    @Override
+    public void setEntityIDGenerator(EntityIDGenerator idGenerator) {
+        this.idGenerator = idGenerator;
     }
 
     private class SimulatorConnectionListener implements ConnectionListener {

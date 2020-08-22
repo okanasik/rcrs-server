@@ -77,7 +77,8 @@ public abstract class AbstractViewer<T extends WorldModel<? extends Entity>> ext
        Handle a KVTimestep object from the server. The default implementation just updates the world model.
        @param timestep The KVTimestep object.
      */
-    protected void handleTimestep(KVTimestep timestep) {
+    @Override
+    public void handleTimestep(KVTimestep timestep) {
         ChangeSet changes = timestep.getChangeSet();
         int time = timestep.getTime();
         if (time != lastUpdateTime + 1) {
@@ -98,6 +99,11 @@ public abstract class AbstractViewer<T extends WorldModel<? extends Entity>> ext
         else {
             super.processMessage(msg);
         }
+    }
+
+    @Override
+    public int getID() {
+        return viewerID;
     }
 
     private class ViewerConnectionListener implements ConnectionListener {

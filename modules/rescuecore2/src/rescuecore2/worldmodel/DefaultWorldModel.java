@@ -1,12 +1,14 @@
 package rescuecore2.worldmodel;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
    Default implementation of a WorldModel.
@@ -68,5 +70,14 @@ public class DefaultWorldModel<T extends Entity> extends AbstractWorldModel<T> {
     @Override
     public final Iterator<T> iterator() {
         return entities.values().iterator();
+    }
+
+    @Override
+    public Collection<? extends Entity> copyAllEntities() {
+        List<Entity> copiedEntityList = new ArrayList<>(entities.values().size());
+        for (T entity : entities.values()) {
+            copiedEntityList.add(entity.copy());
+        }
+        return copiedEntityList;
     }
 }

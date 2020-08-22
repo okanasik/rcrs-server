@@ -2,7 +2,6 @@ package sample;
 
 import rescuecore2.Constants;
 import rescuecore2.Timestep;
-import rescuecore2.messages.Command;
 import rescuecore2.messages.control.KVTimestep;
 import rescuecore2.score.ScoreFunction;
 import rescuecore2.standard.components.StandardViewer;
@@ -10,12 +9,10 @@ import rescuecore2.standard.view.AnimatedWorldModelViewer;
 import rescuecore2.view.RenderedObject;
 import rescuecore2.view.ViewComponent;
 import rescuecore2.view.ViewListener;
-import rescuecore2.worldmodel.ChangeSet;
 
 import javax.swing.*;
 import java.awt.*;
 import java.text.NumberFormat;
-import java.util.Collection;
 import java.util.List;
 
 import static rescuecore2.misc.java.JavaTools.instantiate;
@@ -116,20 +113,7 @@ public class SampleViewer extends StandardViewer {
     }
 
     @Override
-    public void setTimestep(int time, Collection<Command> commandList, ChangeSet changeSet) {
-        model.merge(changeSet);
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                timeLabel.setText("Time: " + time);
-                scoreLabel.setText("Score: " + format.format(scoreFunction.score(model, new Timestep(time))));
-                viewer.view(model, commandList);
-                viewer.repaint();
-            }
-        });
-    }
-
-    @Override
-    protected void handleTimestep(final KVTimestep t) {
+    public void handleTimestep(final KVTimestep t) {
         super.handleTimestep(t);
         SwingUtilities.invokeLater(new Runnable() {
                 public void run() {

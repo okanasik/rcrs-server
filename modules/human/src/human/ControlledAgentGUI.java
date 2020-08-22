@@ -9,7 +9,6 @@ import rescuecore2.config.Config;
 import rescuecore2.config.ConfigException;
 import rescuecore2.connection.ConnectionException;
 import rescuecore2.log.Logger;
-import rescuecore2.messages.Command;
 import rescuecore2.messages.control.KVTimestep;
 import rescuecore2.misc.CommandLineOptions;
 import rescuecore2.standard.components.StandardViewer;
@@ -20,13 +19,11 @@ import rescuecore2.standard.view.StandardWorldModelViewer;
 import rescuecore2.view.RenderedObject;
 import rescuecore2.view.ViewComponent;
 import rescuecore2.view.ViewListener;
-import rescuecore2.worldmodel.ChangeSet;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -231,14 +228,8 @@ public class ControlledAgentGUI extends JPanel {
         }
 
         @Override
-        protected void handleTimestep(KVTimestep t) {
+        public void handleTimestep(KVTimestep t) {
             super.handleTimestep(t);
-            view.repaint();
-            gui.refreshLists();
-        }
-        @Override
-        public void setTimestep(int time, Collection<Command> commandList, ChangeSet changeSet) {
-            model.merge(changeSet);
             view.repaint();
             gui.refreshLists();
         }

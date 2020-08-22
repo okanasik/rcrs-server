@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -176,8 +175,8 @@ public class CollapseSimulator extends StandardSimulator implements
 				config.getFloatValue(WALL_COLLAPSE_EXTENT_MIN_KEY),
 				config.getFloatValue(WALL_COLLAPSE_EXTENT_MAX_KEY),
 				config.getRandom());
-		buildingCache = new HashSet<Building>();
-		roadCache = new HashSet<Road>();
+		buildingCache = new ArrayList<Building>();
+		roadCache = new ArrayList<Road>();
 		for (StandardEntity next : model) {
 			if (next instanceof Building) {
 				buildingCache.add((Building) next);
@@ -228,7 +227,7 @@ public class CollapseSimulator extends StandardSimulator implements
 	}
 
 	private Collection<Building> doCollapse(ChangeSet changes, int time) {
-		Collection<Building> result = new HashSet<Building>();
+		Collection<Building> result = new ArrayList<Building>();
 		if (gui != null) {
 			gui.startCollapse(buildingCache.size());
 		}
@@ -300,7 +299,7 @@ public class CollapseSimulator extends StandardSimulator implements
 		}
 
 		Logger.debug("Collapsing buildings");
-		Collection<Building> result = new HashSet<Building>();
+		Collection<Building> result = new ArrayList<Building>();
 		for (Building b : buildingCache) {
 			StandardEntityConstants.BuildingCode code = b.getBuildingCodeEnum();
 			int damage = code == null ? 0 : stats.get(code).damage();
@@ -344,7 +343,7 @@ public class CollapseSimulator extends StandardSimulator implements
 
 	private Collection<Building> doFireCollapse(ChangeSet changes) {
 		Logger.debug("Checking fire damage");
-		Collection<Building> result = new HashSet<Building>();
+		Collection<Building> result = new ArrayList<Building>();
 		for (Building b : buildingCache) {
 			/*
 			 * Aftershock Requirement @ 2103: it is used in doBlock to check

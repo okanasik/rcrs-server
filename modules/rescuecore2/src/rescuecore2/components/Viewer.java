@@ -1,10 +1,9 @@
 package rescuecore2.components;
 
-import rescuecore2.connection.Connection;
-import rescuecore2.messages.Command;
-import rescuecore2.worldmodel.ChangeSet;
-import rescuecore2.worldmodel.Entity;
 import rescuecore2.config.Config;
+import rescuecore2.connection.Connection;
+import rescuecore2.messages.control.KVTimestep;
+import rescuecore2.worldmodel.Entity;
 
 import java.util.Collection;
 
@@ -21,6 +20,8 @@ public interface Viewer extends Component {
      */
     void postConnect(Connection c, int viewerID, Collection<Entity> entities, Config config);
 
-    // replaces messaging of the viewer
-    void setTimestep(int time, Collection<Command> commandList, ChangeSet changeSet);
+    int getID();
+
+    // enable direct setting of the message
+    void handleTimestep(KVTimestep timestep);
 }

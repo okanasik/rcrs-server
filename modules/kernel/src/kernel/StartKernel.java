@@ -337,7 +337,7 @@ public final class StartKernel {
 
 	private static void autostartComponents(KernelInfo info, Registry registry,
 			KernelGUI gui, Config config) throws InterruptedException {
-	    boolean useProxies = true;
+	    boolean useProxies = false;
 		KernelStartupOptions options = info.options;
 		Collection<Callable<Void>> all = new ArrayList<Callable<Void>>();
 		Config launchConfig = new Config(config);
@@ -363,12 +363,10 @@ public final class StartKernel {
                     } catch (ComponentInitialisationException ex) {
                         ex.printStackTrace();
                     }
-                    viewer.setConfig(launchConfig);
-                    viewer.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
+                    viewer.setConfig(new Config(launchConfig));
+                    viewer.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().copyAllEntities(), info.kernel.getConfig());
                     info.kernel.addViewer(viewer);
                 }
-
-
             }
         }
 
@@ -388,8 +386,8 @@ public final class StartKernel {
                     } catch (ComponentInitialisationException ex) {
                         ex.printStackTrace();
                     }
-                    sim.setConfig(launchConfig);
-                    sim.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().getAllEntities(), info.kernel.getConfig());
+                    sim.setConfig(new Config(launchConfig));
+                    sim.initComponent(info.componentManager.getNextID(), info.kernel.getWorldModel().copyAllEntities(), info.kernel.getConfig());
                     info.kernel.addSimulator(sim);
                 }
             }

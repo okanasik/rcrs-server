@@ -1,5 +1,6 @@
 package rescuecore2.components;
 
+import kernel.EntityIDGenerator;
 import rescuecore2.config.Config;
 import rescuecore2.connection.Connection;
 import rescuecore2.messages.control.KSCommands;
@@ -21,7 +22,9 @@ public interface Simulator extends Component {
        @param config The Config the kernel send to this simulator on connection.
      */
     void postConnect(Connection c, int simulatorID, Collection<Entity> entities, Config config);
+    int getID();
 
+    void setEntityIDGenerator(EntityIDGenerator idGenerator);
     void handleUpdate(KSUpdate update);
     void processCommands(KSCommands commands, ChangeSet change);
 }
