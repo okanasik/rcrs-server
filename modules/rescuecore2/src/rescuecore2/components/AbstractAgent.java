@@ -1,21 +1,23 @@
 package rescuecore2.components;
 
+import rescuecore2.config.Config;
 import rescuecore2.connection.Connection;
-import rescuecore2.connection.ConnectionListener;
 import rescuecore2.connection.ConnectionException;
-import rescuecore2.messages.Message;
+import rescuecore2.connection.ConnectionListener;
+import rescuecore2.log.Logger;
 import rescuecore2.messages.Command;
-import rescuecore2.messages.control.KASense;
-import rescuecore2.messages.control.AKConnect;
+import rescuecore2.messages.Message;
 import rescuecore2.messages.control.AKAcknowledge;
-import rescuecore2.messages.control.KAConnectOK;
+import rescuecore2.messages.control.AKConnect;
 import rescuecore2.messages.control.KAConnectError;
+import rescuecore2.messages.control.KAConnectOK;
+import rescuecore2.messages.control.KASense;
+import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.worldmodel.ChangeSet;
-import rescuecore2.config.Config;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 
@@ -29,6 +31,7 @@ public abstract class AbstractAgent<T extends WorldModel<? extends Entity>, E ex
        The ID of the entity controlled by this agent.
      */
     private EntityID entityID;
+    private Collection<Command> lastCommands = new ArrayList<>();
 
     /**
        Create a new AbstractAgent.
@@ -94,7 +97,9 @@ public abstract class AbstractAgent<T extends WorldModel<? extends Entity>, E ex
        Process an incoming sense message. The default implementation updates the world model and calls {@link #think}. Subclasses should generally not override this method but instead implement the {@link #think} method.
        @param sense The sense message.
      */
-    protected void processSense(KASense sense) {
+    @Override
+    public void processSense(KASense sense) {
+        lastCommands.clear();
         model.merge(sense.getChangeSet());
         Collection<Command> heard = sense.getHearing();
         think(sense.getTime(), sense.getChangeSet(), heard);
@@ -126,6 +131,25 @@ public abstract class AbstractAgent<T extends WorldModel<? extends Entity>, E ex
         else {
             super.processMessage(msg);
         }
+    }
+
+    @Override
+    protected void send(Message msg) {
+        if (connection == null) {
+            lastCommands.add((Command)msg);
+        } else {
+            try {
+                connection.sendMessage(msg);
+            } catch (ConnectionException e) {
+                // Ignore and log
+                Logger.error("Error sending message", e);
+            }
+        }
+    }
+
+    @Override
+    public Collection<Command> getLastCommands() {
+        return lastCommands;
     }
 
     private class AgentConnectionListener implements ConnectionListener {

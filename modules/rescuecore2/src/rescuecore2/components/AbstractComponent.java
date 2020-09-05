@@ -109,7 +109,7 @@ public abstract class AbstractComponent<T extends WorldModel<? extends Entity>> 
        Send a message to the kernel and silently ignore any errors.
        @param msg The message to send.
     */
-    protected final void send(Message msg) {
+    protected void send(Message msg) {
         try {
             connection.sendMessage(msg);
         }

@@ -1,15 +1,15 @@
 package collapse;
 
 
-import java.util.HashMap;
-
 import rescuecore2.messages.control.KSAfterShocksInfo;
 import rescuecore2.standard.entities.Building;
 import rescuecore2.standard.entities.StandardEntity;
-import rescuecore2.standard.entities.StandardEntityURN;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.EntityID;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -20,7 +20,7 @@ import rescuecore2.worldmodel.EntityID;
  *
  */
 public class CollapseWorldModel extends StandardWorldModel {
-	private HashMap<Integer, Float> aftershocks;
+	private Map<Integer, Float> aftershocks;
 	private HashMap<Building, CSBuilding> collapseBuildings;
 
 	public CollapseWorldModel() {

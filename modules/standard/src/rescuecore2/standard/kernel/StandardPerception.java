@@ -1,49 +1,40 @@
 package rescuecore2.standard.kernel;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Hashtable;
-import java.util.Dictionary;
-
-import kernel.Perception;
+import handy.swing.SliderComponent;
 import kernel.AgentProxy;
-
-import rescuecore2.worldmodel.Entity;
-import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.worldmodel.ChangeSet;
-import rescuecore2.worldmodel.properties.IntProperty;
+import kernel.Perception;
+import rescuecore2.GUIComponent;
 import rescuecore2.config.Config;
 import rescuecore2.misc.Pair;
-import rescuecore2.standard.entities.StandardWorldModel;
-import rescuecore2.standard.entities.StandardEntity;
-import rescuecore2.standard.entities.Road;
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.Blockade;
 import rescuecore2.standard.entities.Building;
 import rescuecore2.standard.entities.FireBrigade;
 import rescuecore2.standard.entities.Human;
+import rescuecore2.standard.entities.Road;
+import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardEntityURN;
-import rescuecore2.GUIComponent;
+import rescuecore2.standard.entities.StandardWorldModel;
+import rescuecore2.worldmodel.ChangeSet;
+import rescuecore2.worldmodel.Entity;
+import rescuecore2.worldmodel.EntityID;
+import rescuecore2.worldmodel.WorldModel;
+import rescuecore2.worldmodel.properties.IntProperty;
 
-import java.awt.GridLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JSlider;
-import javax.swing.JCheckBox;
-import javax.swing.SwingConstants;
-import javax.swing.BorderFactory;
-import javax.swing.event.ChangeListener;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
-
-import handy.swing.SliderComponent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
    Legacy implementation of perception with a GUI.
@@ -150,10 +141,8 @@ public class StandardPerception implements Perception, GUIComponent {
         checkForScript();
     }
 
-    @Override
-    public ChangeSet getVisibleEntities(AgentProxy agent) {
+    public ChangeSet getVisibleEntities(StandardEntity agentEntity) {
         synchronized (lock) {
-            StandardEntity agentEntity = (StandardEntity)agent.getControlledEntity();
             ChangeSet result = new ChangeSet();
             // Look for roads/nodes/buildings/humans within range
             Pair<Integer, Integer> location = agentEntity.getLocation(world);
@@ -162,40 +151,40 @@ public class StandardPerception implements Perception, GUIComponent {
                 int y = location.second().intValue();
                 Collection<StandardEntity> nearby = world.getObjectsInRange(x, y, viewDistance);
                 // Copy entities and set property values
-                for (StandardEntity next : nearby) 
+                for (StandardEntity next : nearby)
                 {
                     StandardEntityURN urn = next.getStandardURN();
                     switch (urn) {
-                    case ROAD:
-                    case HYDRANT:
-                        addRoadProperties((Road)next, result);
-                        break;
-                    case BUILDING:
-                    case REFUGE:
-                    case GAS_STATION:
-                    case FIRE_STATION:
-                    case AMBULANCE_CENTRE:
-                    case POLICE_OFFICE:
-                        addBuildingProperties((Building)next, result);
-                        break;
-                    case CIVILIAN:
-                    case FIRE_BRIGADE:
-                    case AMBULANCE_TEAM:
-                    case POLICE_FORCE:
-                        // Always send all properties of the agent-controlled object
-                        if (next == agentEntity) {
-                            addSelfProperties((Human)next, result);
-                        }
-                        else {
-                            addHumanProperties((Human)next, result);
-                        }
-                        break;
-                    case BLOCKADE:
-                        addBlockadeProperties((Blockade)next, result);
-                        break;
-                    default:
-                        // Ignore other types
-                        break;
+                        case ROAD:
+                        case HYDRANT:
+                            addRoadProperties((Road)next, result);
+                            break;
+                        case BUILDING:
+                        case REFUGE:
+                        case GAS_STATION:
+                        case FIRE_STATION:
+                        case AMBULANCE_CENTRE:
+                        case POLICE_OFFICE:
+                            addBuildingProperties((Building)next, result);
+                            break;
+                        case CIVILIAN:
+                        case FIRE_BRIGADE:
+                        case AMBULANCE_TEAM:
+                        case POLICE_FORCE:
+                            // Always send all properties of the agent-controlled object
+                            if (next == agentEntity) {
+                                addSelfProperties((Human)next, result);
+                            }
+                            else {
+                                addHumanProperties((Human)next, result);
+                            }
+                            break;
+                        case BLOCKADE:
+                            addBlockadeProperties((Blockade)next, result);
+                            break;
+                        default:
+                            // Ignore other types
+                            break;
                     }
                 }
                 // Now look for far fires
@@ -214,6 +203,17 @@ public class StandardPerception implements Perception, GUIComponent {
             }
             return result;
         }
+    }
+
+    @Override
+    public ChangeSet getVisibleEntities(EntityID agentID) {
+        StandardEntity se = world.getEntity(agentID);
+        return getVisibleEntities(se);
+    }
+
+    @Override
+    public ChangeSet getVisibleEntities(AgentProxy agent) {
+        return getVisibleEntities((StandardEntity)agent.getControlledEntity());
     }
 
     private void addRoadProperties(Road road, ChangeSet result) {

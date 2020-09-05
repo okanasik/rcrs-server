@@ -1,9 +1,10 @@
 package kernel;
 
 import rescuecore2.config.Config;
-import rescuecore2.worldmodel.Entity;
-import rescuecore2.worldmodel.WorldModel;
 import rescuecore2.worldmodel.ChangeSet;
+import rescuecore2.worldmodel.Entity;
+import rescuecore2.worldmodel.EntityID;
+import rescuecore2.worldmodel.WorldModel;
 
 /**
    Implementations of this interface are responsible for determining what entities/properties each agent can see.
@@ -28,4 +29,6 @@ public interface Perception {
        @param timestep The current timestep.
     */
     void setTime(int timestep);
+
+    ChangeSet getVisibleEntities(EntityID id);
 }

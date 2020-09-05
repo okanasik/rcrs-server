@@ -223,7 +223,7 @@ public class ComponentManager implements ConnectionManagerListener,
 				if (next.requestID == requestID && next.agentID.equals(agentID)
 						&& next.connection == c) {
 					agentsToAcknowledge.remove(next);
-					kernel.addAgent(next.agent);
+					kernel.addAgentProxy(next.agent);
 					agentLock.notifyAll();
 					return true;
 				}
@@ -269,7 +269,7 @@ public class ComponentManager implements ConnectionManagerListener,
 		}
 	}
 
-	private ControlledEntityInfo findEntityToControl(List<String> types) {
+	public ControlledEntityInfo findEntityToControl(List<String> types) {
 		Logger.debug("Finding entity to control. Requested types: " + types);
 		for (String next : types) {
 			Queue<ControlledEntityInfo> q = uncontrolledEntities.get(next);
@@ -565,24 +565,6 @@ public class ComponentManager implements ConnectionManagerListener,
 		public String toString() {
 			return viewer + " " + viewerID + "(connection request ID "
 					+ requestID + ")";
-		}
-	}
-
-	private static class ControlledEntityInfo {
-		Entity entity;
-		Collection<? extends Entity> visibleSet;
-		Config config;
-
-		public ControlledEntityInfo(Entity entity,
-				Collection<? extends Entity> visibleSet, Config config) {
-			this.entity = entity;
-			this.visibleSet = visibleSet;
-			this.config = config;
-		}
-
-		@Override
-		public String toString() {
-			return entity.toString();
 		}
 	}
 }

@@ -1,59 +1,53 @@
 package rescuecore2.standard.kernel;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
-
-import kernel.Perception;
 import kernel.AgentProxy;
-
-import rescuecore2.worldmodel.Entity;
-import rescuecore2.worldmodel.EntityID;
-import rescuecore2.worldmodel.WorldModel;
-import rescuecore2.worldmodel.ChangeSet;
-import rescuecore2.worldmodel.properties.IntProperty;
+import kernel.Perception;
+import rescuecore2.GUIComponent;
 import rescuecore2.config.Config;
+import rescuecore2.log.Logger;
+import rescuecore2.misc.Pair;
+import rescuecore2.misc.collections.LazyMap;
+import rescuecore2.misc.geometry.GeometryTools2D;
+import rescuecore2.misc.geometry.Line2D;
+import rescuecore2.misc.geometry.Point2D;
+import rescuecore2.misc.geometry.Vector2D;
+import rescuecore2.misc.gui.ScreenTransform;
+import rescuecore2.standard.entities.AmbulanceTeam;
+import rescuecore2.standard.entities.Area;
+import rescuecore2.standard.entities.Blockade;
+import rescuecore2.standard.entities.Building;
+import rescuecore2.standard.entities.Edge;
+import rescuecore2.standard.entities.FireBrigade;
+import rescuecore2.standard.entities.Human;
+import rescuecore2.standard.entities.Road;
+import rescuecore2.standard.entities.StandardEntity;
+import rescuecore2.standard.entities.StandardEntityURN;
+import rescuecore2.standard.entities.StandardWorldModel;
+import rescuecore2.standard.view.BuildingLayer;
+import rescuecore2.standard.view.HumanLayer;
+import rescuecore2.standard.view.RoadBlockageLayer;
+import rescuecore2.standard.view.RoadLayer;
+import rescuecore2.standard.view.StandardViewLayer;
+import rescuecore2.standard.view.StandardWorldModelViewer;
 import rescuecore2.view.RenderedObject;
 import rescuecore2.view.ViewComponent;
 import rescuecore2.view.ViewListener;
-import rescuecore2.misc.Pair;
-import rescuecore2.misc.collections.LazyMap;
-import rescuecore2.misc.gui.ScreenTransform;
-import rescuecore2.misc.geometry.Point2D;
-import rescuecore2.misc.geometry.Line2D;
-import rescuecore2.misc.geometry.Vector2D;
-import rescuecore2.misc.geometry.GeometryTools2D;
-import rescuecore2.log.Logger;
-import rescuecore2.GUIComponent;
+import rescuecore2.worldmodel.ChangeSet;
+import rescuecore2.worldmodel.Entity;
+import rescuecore2.worldmodel.EntityID;
+import rescuecore2.worldmodel.WorldModel;
+import rescuecore2.worldmodel.properties.IntProperty;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.BorderLayout;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-
-import rescuecore2.standard.entities.StandardWorldModel;
-import rescuecore2.standard.entities.StandardEntity;
-import rescuecore2.standard.entities.Road;
-import rescuecore2.standard.entities.Area;
-import rescuecore2.standard.entities.Edge;
-import rescuecore2.standard.entities.Blockade;
-import rescuecore2.standard.entities.Building;
-import rescuecore2.standard.entities.Human;
-import rescuecore2.standard.entities.AmbulanceTeam;
-import rescuecore2.standard.entities.FireBrigade;
-import rescuecore2.standard.entities.StandardEntityURN;
-import rescuecore2.standard.view.StandardWorldModelViewer;
-import rescuecore2.standard.view.StandardViewLayer;
-import rescuecore2.standard.view.BuildingLayer;
-import rescuecore2.standard.view.RoadLayer;
-import rescuecore2.standard.view.RoadBlockageLayer;
-import rescuecore2.standard.view.HumanLayer;
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
    Line of sight perception.
@@ -125,9 +119,7 @@ public class LineOfSightPerception implements Perception, GUIComponent {
         }
     }
 
-    @Override
-    public ChangeSet getVisibleEntities(AgentProxy agent) {
-        StandardEntity agentEntity = (StandardEntity)agent.getControlledEntity();
+    public ChangeSet getVisibleEntities(StandardEntity agentEntity) {
         Logger.debug("Finding visible entities for " + agentEntity);
         ChangeSet result = new ChangeSet();
         // Look for objects within range
@@ -139,36 +131,36 @@ public class LineOfSightPerception implements Perception, GUIComponent {
             for (StandardEntity next : visible) {
                 StandardEntityURN urn = next.getStandardURN();
                 switch (urn) {
-                case ROAD:
-                case HYDRANT:
-                    addRoadProperties((Road)next, result);
-                    break;
-                case BUILDING:
-                case REFUGE:
-                case GAS_STATION:
-                case FIRE_STATION:
-                case AMBULANCE_CENTRE:
-                case POLICE_OFFICE:
-                    addBuildingProperties((Building)next, result);
-                    break;
-                case CIVILIAN:
-                case FIRE_BRIGADE:
-                case AMBULANCE_TEAM:
-                case POLICE_FORCE:
-                    // Always send all properties of the agent-controlled object
-                    if (next == agentEntity) {
-                        addSelfProperties((Human)next, result);
-                    }
-                    else {
-                        addHumanProperties((Human)next, result);
-                    }
-                    break;
-                case BLOCKADE:
-                    addBlockadeProperties((Blockade)next, result);
-                    break;
-                default:
-                    // Ignore other types
-                    break;
+                    case ROAD:
+                    case HYDRANT:
+                        addRoadProperties((Road)next, result);
+                        break;
+                    case BUILDING:
+                    case REFUGE:
+                    case GAS_STATION:
+                    case FIRE_STATION:
+                    case AMBULANCE_CENTRE:
+                    case POLICE_OFFICE:
+                        addBuildingProperties((Building)next, result);
+                        break;
+                    case CIVILIAN:
+                    case FIRE_BRIGADE:
+                    case AMBULANCE_TEAM:
+                    case POLICE_FORCE:
+                        // Always send all properties of the agent-controlled object
+                        if (next == agentEntity) {
+                            addSelfProperties((Human)next, result);
+                        }
+                        else {
+                            addHumanProperties((Human)next, result);
+                        }
+                        break;
+                    case BLOCKADE:
+                        addBlockadeProperties((Blockade)next, result);
+                        break;
+                    default:
+                        // Ignore other types
+                        break;
                 }
             }
         }
@@ -176,6 +168,17 @@ public class LineOfSightPerception implements Perception, GUIComponent {
             view.repaint();
         }
         return result;
+    }
+
+    @Override
+    public ChangeSet getVisibleEntities(EntityID agentID) {
+        StandardEntity se = world.getEntity(agentID);
+        return getVisibleEntities(se);
+    }
+
+    @Override
+    public ChangeSet getVisibleEntities(AgentProxy agent) {
+        return getVisibleEntities((StandardEntity) agent.getControlledEntity());
     }
 
     private void addRoadProperties(Road road, ChangeSet result) {

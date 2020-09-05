@@ -829,6 +829,10 @@ public class CollapseSimulator extends StandardSimulator implements
 		}
 	}
 
+	public void setAftershocks(KSAfterShocksInfo ksAfterShocksInfo) {
+	    model().updateAftershocks(ksAfterShocksInfo);
+    }
+
 	public static void main(String[] args) {
 	}
 }

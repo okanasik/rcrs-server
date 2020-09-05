@@ -1,9 +1,11 @@
 package rescuecore2.components;
 
+import rescuecore2.config.Config;
 import rescuecore2.connection.Connection;
+import rescuecore2.messages.Command;
+import rescuecore2.messages.control.KASense;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
-import rescuecore2.config.Config;
 
 import java.util.Collection;
 
@@ -31,4 +33,7 @@ public interface Agent extends Component {
        @return The entity ID or null if this agent is not yet connected.
      */
     EntityID getID();
+
+    void processSense(KASense sense);
+    Collection<Command> getLastCommands();
 }

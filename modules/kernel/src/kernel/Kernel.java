@@ -3,6 +3,7 @@ package kernel;
 
 import rescuecore2.Constants;
 import rescuecore2.Timestep;
+import rescuecore2.components.Agent;
 import rescuecore2.components.Simulator;
 import rescuecore2.components.Viewer;
 import rescuecore2.config.Config;
@@ -18,6 +19,7 @@ import rescuecore2.log.PerceptionRecord;
 import rescuecore2.log.StartLogRecord;
 import rescuecore2.log.UpdatesRecord;
 import rescuecore2.messages.Command;
+import rescuecore2.messages.control.KASense;
 import rescuecore2.messages.control.KSCommands;
 import rescuecore2.messages.control.KSUpdate;
 import rescuecore2.messages.control.KVTimestep;
@@ -34,6 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -54,7 +57,7 @@ public class Kernel {
 
     private Set<KernelListener> listeners;
 
-    private Collection<AgentProxy> agents;
+    private Collection<AgentProxy> agentProxies;
     private Collection<SimulatorProxy> simProxies;
     private Collection<ViewerProxy> viewerProxies;
     private int time;
@@ -70,7 +73,9 @@ public class Kernel {
     private boolean isShutdown;
 
     private Collection<Viewer> viewers;
-    private Collection<Simulator> sims;
+    public List<Simulator> sims;
+    private List<Agent> agents;
+    private Collection<Command> agentCommands;
 
     //    private ChangeSetComponent simulatorChanges;
 
@@ -108,13 +113,18 @@ public class Kernel {
             this.commandCollector = collector;
             this.idGenerator = idGenerator;
             listeners = new HashSet<KernelListener>();
-            agents = new TreeSet<AgentProxy>(new Comparator<AgentProxy>() {
+            agentProxies = new TreeSet<AgentProxy>(new Comparator<AgentProxy>() {
                 @Override
                 public int compare(AgentProxy o1, AgentProxy o2) {
                     return Integer.compare(o1.hashCode(), o2.hashCode());
                 }
             });
-            simProxies = new HashSet<SimulatorProxy>();
+            simProxies = new TreeSet<SimulatorProxy>(new Comparator<SimulatorProxy>() {
+                @Override
+                public int compare(SimulatorProxy sp1, SimulatorProxy sp2) {
+                    return sp1.getName().compareTo(sp2.getName());
+                }
+            });
             viewerProxies = new HashSet<ViewerProxy>();
             time = 0;
             try {
@@ -157,6 +167,8 @@ public class Kernel {
 
             viewers = new ArrayList<>();
             sims = new ArrayList<>();
+            agents = new ArrayList<>();
+            agentCommands = new ArrayList<>();
 
             Logger.info("Kernel initialised");
             Logger.info("Perception module: " + perception);
@@ -191,20 +203,31 @@ public class Kernel {
        Add an agent to the system.
        @param agent The agent to add.
     */
-    public void addAgent(AgentProxy agent) {
+    public void addAgentProxy(AgentProxy agent) {
         synchronized (this) {
-            agents.add(agent);
+            agentProxies.add(agent);
         }
         fireAgentAdded(agent);
+    }
+
+    public void addAgent(Agent agent) {
+        agents.add(agent);
+        //todo: check whether we need to call fireAgentAdded()
+        Collections.sort(agents, new Comparator<Agent>() {
+            @Override
+            public int compare(Agent t1, Agent t2) {
+                return Integer.compare(t1.getID().hashCode(), t2.getID().hashCode());
+            }
+        });
     }
 
     /**
        Remove an agent from the system.
        @param agent The agent to remove.
     */
-    public void removeAgent(AgentProxy agent) {
+    public void removeAgentProxy(AgentProxy agent) {
         synchronized (this) {
-            agents.remove(agent);
+            agentProxies.remove(agent);
         }
         fireAgentRemoved(agent);
     }
@@ -213,9 +236,9 @@ public class Kernel {
        Get all agents in the system.
        @return An unmodifiable view of all agents.
     */
-    public Collection<AgentProxy> getAllAgents() {
+    public Collection<AgentProxy> getAllAgentProxies() {
         synchronized (this) {
-            return Collections.unmodifiableCollection(agents);
+            return Collections.unmodifiableCollection(agentProxies);
         }
     }
 
@@ -308,7 +331,6 @@ public class Kernel {
     */
     public void addKernelListener(KernelListener l) {
         synchronized (listeners) {
-            System.out.println("kernellistener l:" + l);
             listeners.add(l);
         }
     }
@@ -381,6 +403,7 @@ public class Kernel {
                 long perceptionTime = System.currentTimeMillis();
                 Logger.debug("Waiting for commands");
                 Collection<Command> commands = waitForCommands(time);
+
                 nextTimestep.setCommands(commands);
                 if (!config.getBooleanValue("nolog")) {
                     log.writeRecord(new CommandsRecord(time, commands));
@@ -438,7 +461,7 @@ public class Kernel {
             Logger.info("Kernel is shutting down");
 //            ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 //            List<Callable<Object>> callables = new ArrayList<Callable<Object>>();
-            for (AgentProxy next : agents) {
+            for (AgentProxy next : agentProxies) {
                 final AgentProxy proxy = next;
 //                callables.add(Executors.callable(new Runnable() {
 //                        @Override
@@ -493,7 +516,7 @@ public class Kernel {
     private void sendAgentUpdates(Timestep timestep, Collection<Command> commandsLastTimestep) throws InterruptedException, KernelException, LogException {
         perception.setTime(time);
         communicationModel.process(time, commandsLastTimestep);
-        for (AgentProxy next : agents) {
+        for (AgentProxy next : agentProxies) {
             if (Thread.interrupted()) {
                 throw new InterruptedException();
             }
@@ -506,13 +529,28 @@ public class Kernel {
             }
             next.sendPerceptionUpdate(time, visible, heard);
         }
+
+        agentCommands.clear();
+        for (Agent agent : agents) {
+            ChangeSet visible = perception.getVisibleEntities(agent.getID());
+            Collection<Command> heard = communicationModel.getHearing(getWorldModel().getEntity(agent.getID()));
+            timestep.registerPerception(agent.getID(), visible, heard);
+            if (!config.getBooleanValue("nolog")) {
+                log.writeRecord(new PerceptionRecord(time, agent.getID(), visible, heard));
+            }
+            agent.processSense(new KASense(agent.getID(), time, visible, heard));
+            agentCommands.addAll(agent.getLastCommands());
+        }
     }
 
     private Collection<Command> waitForCommands(int timestep) throws InterruptedException {
-        Collection<Command> commands = commandCollector.getAgentCommands(agents, timestep);
+        Collection<Command> commands = commandCollector.getAgentCommands(agentProxies, timestep);
+        // add the commands from agents
+        commands.addAll(agentCommands);
         Logger.debug("Raw commands: " + commands);
         commandFilter.filter(commands, getState());
         Logger.debug("Filtered commands: " + commands);
+
         return commands;
     }
 
